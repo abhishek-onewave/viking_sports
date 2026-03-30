@@ -1,27 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-interface TreeNode {
-  nodeid: number;
-  depth?: number;
-  split?: string;
-  split_condition?: number;
-  yes?: number;
-  no?: number;
-  missing?: number;
-  leaf?: number;
-  children?: TreeNode[];
+/**
+ * XGBoost native JSON format scorer.
+ * XGBoost 2.0+ stores trees as flat arrays, not nested node objects.
+ */
+interface XGBoostTree {
+  base_weights: number[];
+  left_children: number[];
+  right_children: number[];
+  split_conditions: number[];
+  split_indices: number[];
+  default_left: number[];
 }
 
 interface XGBoostModelJSON {
   learner: {
     gradient_booster: {
       model: {
-        trees: TreeNode[];
-        tree_info: number[];
+        trees: XGBoostTree[];
       };
     };
     learner_model_param: {
-      base_score: string;
+      base_score: number[];  // stored in log-odds space in XGBoost 2.0+
       num_feature: string;
     };
   };
@@ -31,46 +31,36 @@ function sigmoid(x: number): number {
   return 1.0 / (1.0 + Math.exp(-x));
 }
 
-function buildNodeMap(tree: TreeNode): Map<number, TreeNode> {
-  const map = new Map<number, TreeNode>();
-  const stack: TreeNode[] = [tree];
-  while (stack.length > 0) {
-    const node = stack.pop()!;
-    map.set(node.nodeid, node);
-    if (node.children) {
-      for (const child of node.children) {
-        stack.push(child);
-      }
-    }
-  }
-  return map;
+/** Convert probability to log-odds (logit).
+ *  XGBoost 3.x stores base_score in probability space in the native JSON,
+ *  but tree leaf values are in log-odds space, so we must convert. */
+function logit(p: number): number {
+  return Math.log(p / (1.0 - p));
 }
 
-function scoreTree(nodeMap: Map<number, TreeNode>, features: number[]): number {
-  let nodeId = 0;
-  // eslint-disable-next-line no-constant-condition
+function scoreTree(tree: XGBoostTree, features: number[]): number {
+  let nodeIdx = 0;
+
   while (true) {
-    const node = nodeMap.get(nodeId);
-    if (!node) return 0;
-
-    if (node.leaf !== undefined) {
-      return node.leaf;
+    // A leaf node has left_children === -1
+    if (tree.left_children[nodeIdx] === -1) {
+      return tree.base_weights[nodeIdx];
     }
 
-    const splitFeatureIdx = parseInt(node.split ?? "0", 10);
-    const splitCondition = node.split_condition ?? 0;
-    const featureValue = features[splitFeatureIdx] ?? 0;
+    const featureIdx = tree.split_indices[nodeIdx];
+    const threshold = tree.split_conditions[nodeIdx];
+    const featureVal = features[featureIdx] ?? 0;
 
-    if (featureValue < splitCondition) {
-      nodeId = node.yes ?? 0;
+    // Standard numeric split: go left if < threshold, else right
+    if (featureVal < threshold) {
+      nodeIdx = tree.left_children[nodeIdx];
     } else {
-      nodeId = node.no ?? 0;
+      nodeIdx = tree.right_children[nodeIdx];
     }
   }
 }
 
-let cachedModel: { trees: Map<number, TreeNode>[]; baseScore: number } | null =
-  null;
+let cachedModel: { trees: XGBoostTree[]; baseScore: number } | null = null;
 
 export async function loadModel(): Promise<void> {
   if (cachedModel) return;
@@ -78,18 +68,24 @@ export async function loadModel(): Promise<void> {
   const res = await fetch("/model/xgboost-model.json");
   const modelJson: XGBoostModelJSON = await res.json();
 
-  const rawBaseScore = parseFloat(
-    modelJson.learner.learner_model_param.base_score
-  );
+  // base_score in XGBoost 3.x native JSON is stored as a string like "[4.9295774E-1]"
+  // (array bracket notation as a string). Strip brackets and parse.
+  const baseScoreRaw = modelJson.learner.learner_model_param.base_score as unknown as string | number[];
+  let baseScore: number;
+  if (typeof baseScoreRaw === 'string') {
+    // e.g. "[4.9295774E-1]"
+    const cleaned = (baseScoreRaw as string).replace(/[\[\]]/g, '').trim();
+    baseScore = parseFloat(cleaned);
+  } else if (Array.isArray(baseScoreRaw)) {
+    baseScore = (baseScoreRaw as number[])[0];
+  } else {
+    baseScore = parseFloat(String(baseScoreRaw));
+  }
 
-  const trees = modelJson.learner.gradient_booster.model.trees.map(
-    (tree: any) => buildNodeMap(tree)
-  );
+  const trees = modelJson.learner.gradient_booster.model.trees as XGBoostTree[];
 
-  cachedModel = {
-    trees,
-    baseScore: rawBaseScore,
-  };
+  // base_score is stored in probability space; convert to log-odds for prediction
+  cachedModel = { trees, baseScore: logit(baseScore) };
 }
 
 export function predict(features: number[]): number {
@@ -97,13 +93,12 @@ export function predict(features: number[]): number {
     throw new Error("Model not loaded. Call loadModel() first.");
   }
 
-  let rawScore = 0;
-  for (const treeMap of cachedModel.trees) {
-    rawScore += scoreTree(treeMap, features);
+  let rawScore = cachedModel.baseScore;
+
+  for (const tree of cachedModel.trees) {
+    rawScore += scoreTree(tree, features);
   }
 
-  // For binary:logistic, base_score in JSON is already in logit space after XGBoost 2.0
-  // but we still need to apply sigmoid to the sum of leaf values
-  const probability = sigmoid(rawScore);
-  return probability;
+  // For binary:logistic: probability = sigmoid(base_score + sum_of_leaves)
+  return sigmoid(rawScore);
 }

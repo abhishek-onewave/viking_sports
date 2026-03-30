@@ -8,6 +8,10 @@ const DECADE_ORDINAL: Record<string, number> = {
   "2020s": 5,
 };
 
+// StandardScaler params fitted on training data (only hold_bucket & decade_ordinal are scaled)
+const SCALER_MEAN = [2.2253521126760565, 3.8732394366197185];
+const SCALER_SCALE = [1.406195377391401, 1.4234413513377617];
+
 function holdBucket(years: number): number {
   if (years <= 3) return 1;
   if (years <= 10) return 2;
@@ -18,9 +22,15 @@ function holdBucket(years: number): number {
 export function buildFeatureVector(input: PredictionInput): number[] {
   const { assetType, holdYears, decade, isRealized } = input;
 
+  // Scale hold_bucket and decade_ordinal to match training pipeline
+  const rawHoldBucket = holdBucket(holdYears);
+  const rawDecadeOrdinal = DECADE_ORDINAL[decade] ?? 5;
+  const scaledHoldBucket = (rawHoldBucket - SCALER_MEAN[0]) / SCALER_SCALE[0];
+  const scaledDecadeOrdinal = (rawDecadeOrdinal - SCALER_MEAN[1]) / SCALER_SCALE[1];
+
   const featureMap: Record<string, number> = {
-    hold_bucket: holdBucket(holdYears),
-    decade_ordinal: DECADE_ORDINAL[decade] ?? 5,
+    hold_bucket: scaledHoldBucket,
+    decade_ordinal: scaledDecadeOrdinal,
     is_realized: isRealized ? 1 : 0,
     is_publication: assetType === "Publications" ? 1 : 0,
     is_memorabilia: assetType === "Memorabilia" ? 1 : 0,

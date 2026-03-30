@@ -10,28 +10,78 @@ const View = dynamic(
 
       const FloatingCard = lazy(() => import('./FloatingCard'));
       const ParticleField = lazy(() => import('./ParticleField'));
+      const AuroraBackground = lazy(() => import('./AuroraBackground'));
+
+      // Lazy-load post-processing
+      const Effects = lazy(async () => {
+        const [{ EffectComposer, Bloom, Vignette }] = await Promise.all([
+          import('@react-three/postprocessing'),
+        ]);
+        function PostEffects() {
+          return (
+            <EffectComposer multisampling={0}>
+              <Bloom
+                intensity={0.8}
+                luminanceThreshold={0.3}
+                luminanceSmoothing={0.9}
+                mipmapBlur
+              />
+              <Vignette eskil={false} offset={0.3} darkness={0.6} />
+            </EffectComposer>
+          );
+        }
+        return { default: PostEffects };
+      });
 
       function Scene() {
         return (
           <>
-            <ambientLight intensity={0.3} />
+            <AuroraBackground />
+
+            {/* Ambient */}
+            <ambientLight intensity={0.2} />
+
+            {/* Key light - warm */}
             <directionalLight
-              position={[5, 5, 5]}
-              intensity={0.8}
-              color="#F1F5F9"
+              position={[4, 6, 6]}
+              intensity={1.2}
+              color="#FFF4E0"
+              castShadow
             />
+
+            {/* Fill light - cool ice */}
             <pointLight
-              position={[-3, 2, 4]}
-              intensity={0.5}
-              color="#D4A843"
-            />
-            <pointLight
-              position={[3, -2, 3]}
-              intensity={0.3}
+              position={[-5, 3, 4]}
+              intensity={1.5}
               color="#7DD3FC"
+              distance={20}
+              decay={2}
             />
+
+            {/* Rim light - gold */}
+            <pointLight
+              position={[3, -3, -2]}
+              intensity={1.0}
+              color="#E8B84B"
+              distance={18}
+              decay={2}
+            />
+
+            {/* Top accent */}
+            <pointLight
+              position={[0, 8, 2]}
+              intensity={0.4}
+              color="#D4A843"
+              distance={25}
+              decay={2}
+            />
+
             <FloatingCard />
             <ParticleField />
+
+            <Suspense fallback={null}>
+              <Effects />
+            </Suspense>
           </>
         );
       }
@@ -39,13 +89,14 @@ const View = dynamic(
       function CanvasWrapper() {
         return (
           <Canvas
-            camera={{ position: [0, 0, 6], fov: 45 }}
+            camera={{ position: [0, 0.3, 7], fov: 42 }}
             gl={{
               antialias: true,
-              toneMapping: 5, // ACESFilmicToneMapping
-              toneMappingExposure: 1.2,
+              toneMapping: 4, // CineonToneMapping
+              toneMappingExposure: 1.4,
+              powerPreference: 'high-performance',
             }}
-            shadows="soft"
+            dpr={[1, 1.5]}
             style={{ pointerEvents: 'auto' }}
           >
             <Suspense fallback={null}>
@@ -60,7 +111,7 @@ const View = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full bg-gradient-to-br from-viking-navy via-viking-deep to-viking-charcoal" />
+      <div className="w-full h-full bg-gradient-to-br from-viking-navy via-viking-deep to-[#0A1628]" />
     ),
   }
 );
