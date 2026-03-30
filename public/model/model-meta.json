@@ -1,0 +1,56 @@
+{
+  "features": [
+    "hold_bucket",
+    "decade_ordinal",
+    "is_realized",
+    "is_publication",
+    "is_memorabilia",
+    "is_rookie_card",
+    "is_ticket",
+    "is_jersey",
+    "type_Cards (Non-Rookie)",
+    "type_Coins & Currency",
+    "type_Complete Sets",
+    "type_Game-Used Equipment",
+    "type_Game-Worn Jerseys",
+    "type_Game-Worn Shoes",
+    "type_Memorabilia",
+    "type_Publications",
+    "type_Rookie Cards",
+    "type_Sealed Wax",
+    "type_Stickers",
+    "type_Tickets & Passes"
+  ],
+  "metrics": {
+    "test_accuracy": 0.8889,
+    "test_f1": 0.8889,
+    "test_auc": 0.9753,
+    "cv_acc_mean": 0.832,
+    "n_train": 71,
+    "threshold": 0.5
+  },
+  "n_estimators": 50,
+  "max_depth": 2,
+  "valid_asset_types": [
+    "Rookie Cards",
+    "Cards (Non-Rookie)",
+    "Publications",
+    "Memorabilia",
+    "Game-Worn Jerseys",
+    "Game-Worn Shoes",
+    "Game-Used Equipment",
+    "Autographs",
+    "Tickets & Passes",
+    "Complete Sets",
+    "Coins & Currency",
+    "Stickers",
+    "Sealed Wax"
+  ],
+  "valid_decades": [
+    "1980s",
+    "1990s",
+    "2000s",
+    "2010s",
+    "2020s"
+  ]
+}
