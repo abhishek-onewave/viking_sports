@@ -2,8 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { predictDeal } from '@/lib/model/predict';
 import { savePrediction } from '@/lib/supabase/queries';
+import { useAuth } from '@/context/AuthContext';
 import {
   PredictionInput,
   PredictionResult,
@@ -124,6 +126,8 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
 }
 
 export default function PredictionForm() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [assetType, setAssetType] = useState<string>('');
   const [holdYears, setHoldYears] = useState<number>(5);
   const [decade, setDecade] = useState<string>('2000s');
@@ -136,6 +140,12 @@ export default function PredictionForm() {
 
   const handleSubmit = useCallback(async () => {
     if (!assetType) return;
+
+    // Require authentication
+    if (!user) {
+      router.push('/login');
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -339,15 +349,30 @@ export default function PredictionForm() {
               </div>
             )}
 
+            {/* Auth gate banner */}
+            {!authLoading && !user && (
+              <div className="mb-6 rounded-xl border border-viking-gold/20 bg-viking-gold/5 px-5 py-4 flex items-center justify-between gap-4">
+                <p className="text-sm text-viking-steel">
+                  <span className="text-viking-gold font-medium">Sign in required</span> — Create a free account to analyze deals
+                </p>
+                <a
+                  href="/login"
+                  className="shrink-0 rounded-lg bg-viking-gold px-4 py-2 text-xs font-semibold text-viking-deep hover:bg-viking-amber transition-colors"
+                >
+                  Sign In
+                </a>
+              </div>
+            )}
+
             {/* Submit */}
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!assetType || loading}
+              disabled={!assetType || loading || (!authLoading && !user)}
               className={`
                 w-full rounded-xl py-4 px-8 text-base font-semibold transition-all duration-300
                 ${
-                  !assetType
+                  !assetType || (!authLoading && !user)
                     ? 'bg-viking-iron/40 text-viking-steel/50 cursor-not-allowed'
                     : loading
                       ? 'bg-viking-gold/70 text-viking-deep cursor-wait'
@@ -381,6 +406,8 @@ export default function PredictionForm() {
                   </svg>
                   Analyzing...
                 </span>
+              ) : !authLoading && !user ? (
+                'Sign In to Analyze'
               ) : (
                 'Analyze Deal'
               )}
