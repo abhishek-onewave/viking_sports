@@ -149,8 +149,10 @@ export default function PredictionForm() {
       const prediction = await predictDeal(input);
       setResult(prediction);
 
-      // Fire and forget save
-      savePrediction(prediction).catch(() => {});
+      // Save and notify dashboard
+      savePrediction(prediction)
+        .then(() => window.dispatchEvent(new Event('prediction-saved')))
+        .catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Prediction failed');
     } finally {

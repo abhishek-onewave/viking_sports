@@ -24,23 +24,24 @@ export default function DashboardSection() {
   const [loading, setLoading] = useState(true);
   const [noSupabase, setNoSupabase] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await getRecentPredictions(20);
-        if (data.length === 0) {
-          // Could be no Supabase or just empty
-          setPredictions([]);
-        } else {
-          setPredictions(data);
-        }
-      } catch {
-        setNoSupabase(true);
-      } finally {
-        setLoading(false);
-      }
+  const fetchPredictions = async () => {
+    try {
+      const data = await getRecentPredictions(20);
+      setPredictions(data);
+    } catch {
+      setNoSupabase(true);
+    } finally {
+      setLoading(false);
     }
-    load();
+  };
+
+  useEffect(() => {
+    fetchPredictions();
+
+    // Listen for new predictions saved from PredictionForm
+    const handler = () => fetchPredictions();
+    window.addEventListener('prediction-saved', handler);
+    return () => window.removeEventListener('prediction-saved', handler);
   }, []);
 
   const total = predictions.length;
