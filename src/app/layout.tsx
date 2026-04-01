@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -33,7 +34,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-viking-deep text-viking-snow">{children}</body>
+      <body className="bg-viking-deep text-viking-snow">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

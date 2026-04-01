@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { signOut } from "@/lib/supabase/auth";
 
 const NAV_LINKS = [
   { label: "About", href: "#about" },
@@ -11,12 +14,18 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const { user, profile, loading } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.reload();
+  };
 
   return (
     <motion.header
@@ -54,6 +63,32 @@ export default function Header() {
           >
             Analyze Deal
           </a>
+
+          {/* Auth buttons */}
+          {!loading && (
+            <>
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-viking-steel">
+                    {profile ? `${profile.first_name} ${profile.last_name}` : user.email}
+                  </span>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-xs font-medium text-viking-steel/70 border border-viking-iron/40 rounded-lg px-3 py-1.5 hover:text-viking-snow hover:border-viking-steel/40 transition-all duration-200"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-viking-snow border border-viking-steel/20 rounded-lg px-4 py-2 hover:bg-viking-snow/5 hover:border-viking-steel/40 transition-all duration-200"
+                >
+                  Sign In
+                </Link>
+              )}
+            </>
+          )}
         </nav>
       </div>
     </motion.header>

@@ -1,5 +1,6 @@
 import { supabase } from "./client";
 import { PredictionResult } from "../model/types";
+import { getUser } from "./auth";
 
 export interface StoredPrediction {
   id: string;
@@ -18,6 +19,8 @@ export async function savePrediction(
 ): Promise<void> {
   if (!supabase) return;
 
+  const user = await getUser();
+
   await supabase.from("predictions").insert({
     asset_type: result.assetType,
     hold_years: result.holdYears,
@@ -26,6 +29,7 @@ export async function savePrediction(
     prediction: result.prediction,
     probability: result.probability,
     confidence: result.confidence,
+    user_id: user?.id ?? null,
   });
 }
 
