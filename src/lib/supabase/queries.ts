@@ -26,6 +26,7 @@ export async function savePrediction(
     hold_years: result.holdYears,
     decade: result.decade,
     is_realized: result.isRealized,
+    price_tier: result.priceTier,
     prediction: result.prediction,
     probability: result.probability,
     confidence: result.confidence,

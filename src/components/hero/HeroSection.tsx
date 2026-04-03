@@ -90,7 +90,7 @@ export default function HeroSection() {
             <motion.div variants={itemVariants} className="mt-5">
               <span className="inline-flex items-center gap-2 rounded-full border border-viking-gold/20 bg-viking-gold/8 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-viking-gold/90">
                 <span className="h-1.5 w-1.5 rounded-full bg-viking-gold animate-pulse" />
-                XGBoost · 94% Accuracy
+                XGBoost · 78% Accuracy
               </span>
             </motion.div>
 
@@ -112,10 +112,9 @@ export default function HeroSection() {
               variants={itemVariants}
               className="mt-6 max-w-[380px] text-[15px] leading-relaxed text-viking-steel"
             >
-              Machine learning predictions for sports memorabilia. Our XGBoost model,
-              trained on{' '}
-              <span className="text-viking-mist font-medium">12,000+ deals</span>,
-              surfaces alpha in seconds.
+              Machine learning predictions for sports memorabilia. Our XGBoost model
+              analyzes asset type, hold period, and market decade to surface
+              investment signals in seconds.
             </motion.p>
 
             {/* CTA row */}
@@ -139,8 +138,8 @@ export default function HeroSection() {
             {/* Stat row */}
             <motion.div variants={itemVariants} className="mt-14 flex gap-8">
               {[
-                { value: '94%', label: 'Accuracy' },
-                { value: '0.97', label: 'AUC Score' },
+                { value: '78%', label: 'Accuracy' },
+                { value: '0.87', label: 'AUC Score' },
                 { value: '<2s', label: 'Inference' },
               ].map((stat) => (
                 <div key={stat.label} className="group">

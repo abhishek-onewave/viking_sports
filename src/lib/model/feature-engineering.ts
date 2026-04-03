@@ -1,4 +1,4 @@
-import { PredictionInput, CLEAN_FEATURES } from "./types";
+import { PredictionInput, CLEAN_FEATURES, PRICE_TIER_ORDINAL, PRICE_TIER_MIDPOINTS } from "./types";
 
 const DECADE_ORDINAL: Record<string, number> = {
   "1980s": 1,
@@ -8,9 +8,10 @@ const DECADE_ORDINAL: Record<string, number> = {
   "2020s": 5,
 };
 
-// StandardScaler params fitted on training data (only hold_bucket & decade_ordinal are scaled)
-const SCALER_MEAN = [2.2253521126760565, 3.8732394366197185];
-const SCALER_SCALE = [1.406195377391401, 1.4234413513377617];
+// StandardScaler params fitted on training data (4 scaled features)
+// Columns: hold_bucket, decade_ordinal, log_buy_price, price_tier_ordinal
+const SCALER_MEAN = [2.205972371577467, 3.8195053354289024, 2.836037393971759, 2.5591860368930432];
+const SCALER_SCALE = [1.1391385318825062, 1.4005234194576999, 1.0980734437995394, 1.2028140822613909];
 
 function holdBucket(years: number): number {
   if (years <= 3) return 1;
@@ -20,18 +21,25 @@ function holdBucket(years: number): number {
 }
 
 export function buildFeatureVector(input: PredictionInput): number[] {
-  const { assetType, holdYears, decade, isRealized } = input;
+  const { assetType, holdYears, decade, isRealized, priceTier } = input;
 
-  // Scale hold_bucket and decade_ordinal to match training pipeline
   const rawHoldBucket = holdBucket(holdYears);
   const rawDecadeOrdinal = DECADE_ORDINAL[decade] ?? 5;
+  const rawLogBuyPrice = Math.log1p(PRICE_TIER_MIDPOINTS[priceTier] ?? 150);
+  const rawPriceTierOrdinal = PRICE_TIER_ORDINAL[priceTier] ?? 2;
+
+  // Scale the 4 continuous features
   const scaledHoldBucket = (rawHoldBucket - SCALER_MEAN[0]) / SCALER_SCALE[0];
   const scaledDecadeOrdinal = (rawDecadeOrdinal - SCALER_MEAN[1]) / SCALER_SCALE[1];
+  const scaledLogBuyPrice = (rawLogBuyPrice - SCALER_MEAN[2]) / SCALER_SCALE[2];
+  const scaledPriceTierOrdinal = (rawPriceTierOrdinal - SCALER_MEAN[3]) / SCALER_SCALE[3];
 
   const featureMap: Record<string, number> = {
     hold_bucket: scaledHoldBucket,
     decade_ordinal: scaledDecadeOrdinal,
     is_realized: isRealized ? 1 : 0,
+    log_buy_price: scaledLogBuyPrice,
+    price_tier_ordinal: scaledPriceTierOrdinal,
     is_publication: assetType === "Publications" ? 1 : 0,
     is_memorabilia: assetType === "Memorabilia" ? 1 : 0,
     is_rookie_card: assetType === "Rookie Cards" ? 1 : 0,

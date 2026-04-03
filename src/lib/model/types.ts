@@ -3,6 +3,7 @@ export interface PredictionInput {
   holdYears: number;
   decade: string;
   isRealized: boolean;
+  priceTier: string;
 }
 
 export interface PredictionResult {
@@ -12,6 +13,7 @@ export interface PredictionResult {
   holdBucketLabel: string;
   decade: string;
   isRealized: boolean;
+  priceTier: string;
   probability: number;
   prediction: "BUY" | "NOT BUY";
   confidence: "High" | "Medium" | "Low";
@@ -25,7 +27,6 @@ export const VALID_ASSET_TYPES = [
   "Game-Worn Jerseys",
   "Game-Worn Shoes",
   "Game-Used Equipment",
-  "Autographs",
   "Tickets & Passes",
   "Complete Sets",
   "Coins & Currency",
@@ -45,6 +46,8 @@ export const CLEAN_FEATURES = [
   "hold_bucket",
   "decade_ordinal",
   "is_realized",
+  "log_buy_price",
+  "price_tier_ordinal",
   "is_publication",
   "is_memorabilia",
   "is_rookie_card",
@@ -63,6 +66,30 @@ export const CLEAN_FEATURES = [
   "type_Stickers",
   "type_Tickets & Passes",
 ] as const;
+
+export const VALID_PRICE_TIERS = [
+  "Under $50",
+  "$50-$500",
+  "$500-$5K",
+  "$5K-$20K",
+  "$20K+",
+] as const;
+
+export const PRICE_TIER_ORDINAL: Record<string, number> = {
+  "Under $50": 1,
+  "$50-$500": 2,
+  "$500-$5K": 3,
+  "$5K-$20K": 4,
+  "$20K+": 5,
+};
+
+export const PRICE_TIER_MIDPOINTS: Record<string, number> = {
+  "Under $50": 25,
+  "$50-$500": 150,
+  "$500-$5K": 2000,
+  "$5K-$20K": 10000,
+  "$20K+": 40000,
+};
 
 export type AssetType = (typeof VALID_ASSET_TYPES)[number];
 export type Decade = (typeof VALID_DECADES)[number];

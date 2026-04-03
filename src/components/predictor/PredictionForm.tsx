@@ -11,6 +11,7 @@ import {
   PredictionResult,
   VALID_ASSET_TYPES,
   VALID_DECADES,
+  VALID_PRICE_TIERS,
   HOLD_BUCKET_LABELS,
 } from '@/lib/model/types';
 import { ASSET_TYPE_ICONS } from '@/lib/utils/constants';
@@ -132,6 +133,7 @@ export default function PredictionForm() {
   const [holdYears, setHoldYears] = useState<number>(5);
   const [decade, setDecade] = useState<string>('2000s');
   const [isRealized, setIsRealized] = useState<boolean>(false);
+  const [priceTier, setPriceTier] = useState<string>('$50-$500');
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,6 +157,7 @@ export default function PredictionForm() {
         holdYears,
         decade,
         isRealized,
+        priceTier,
       };
       const prediction = await predictDeal(input);
       setResult(prediction);
@@ -168,7 +171,7 @@ export default function PredictionForm() {
     } finally {
       setLoading(false);
     }
-  }, [assetType, holdYears, decade, isRealized]);
+  }, [assetType, holdYears, decade, isRealized, priceTier]);
 
   const handleReset = () => {
     setResult(null);
@@ -274,6 +277,35 @@ export default function PredictionForm() {
               </p>
             </fieldset>
 
+            {/* Price Tier */}
+            <fieldset className="mb-10">
+              <legend className="text-sm font-semibold uppercase tracking-wider text-viking-steel mb-4">
+                Purchase Price
+              </legend>
+              <div className="flex flex-wrap gap-3">
+                {VALID_PRICE_TIERS.map((tier) => {
+                  const selected = priceTier === tier;
+                  return (
+                    <button
+                      key={tier}
+                      type="button"
+                      onClick={() => setPriceTier(tier)}
+                      className={`
+                        rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200
+                        ${
+                          selected
+                            ? 'bg-viking-gold text-viking-deep shadow-sm shadow-viking-gold/20'
+                            : 'bg-viking-slate/50 text-viking-steel border border-viking-iron/50 hover:border-viking-gold/30 hover:text-viking-mist'
+                        }
+                      `}
+                    >
+                      {tier}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+
             {/* Acquisition Decade */}
             <fieldset className="mb-10">
               <legend className="text-sm font-semibold uppercase tracking-wider text-viking-steel mb-4">
@@ -368,11 +400,11 @@ export default function PredictionForm() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!assetType || loading || (!authLoading && !user)}
+              disabled={!assetType || !priceTier || loading || (!authLoading && !user)}
               className={`
                 w-full rounded-xl py-4 px-8 text-base font-semibold transition-all duration-300
                 ${
-                  !assetType || (!authLoading && !user)
+                  !assetType || !priceTier || (!authLoading && !user)
                     ? 'bg-viking-iron/40 text-viking-steel/50 cursor-not-allowed'
                     : loading
                       ? 'bg-viking-gold/70 text-viking-deep cursor-wait'
@@ -495,6 +527,8 @@ function ResultDisplay({
       >
         Based on{' '}
         <span className="font-medium text-viking-mist">{result.assetType}</span>{' '}
+        purchased at{' '}
+        <span className="font-medium text-viking-mist">{result.priceTier}</span>,{' '}
         held for{' '}
         <span className="font-medium text-viking-mist">{result.holdYears} years</span>{' '}
         from the{' '}
@@ -513,11 +547,13 @@ function ResultDisplay({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm"
+        className="mt-8 grid grid-cols-2 gap-4 w-full max-w-md"
       >
         {[
           { label: 'Hold Bucket', value: result.holdBucketLabel },
+          { label: 'Price Tier', value: result.priceTier },
           { label: 'Status', value: result.isRealized ? 'Realized' : 'Unrealized' },
+          { label: 'Decade', value: result.decade },
         ].map((item) => (
           <div
             key={item.label}
