@@ -163,15 +163,97 @@ Holdout (n=1,470): R² 0.836, median error 1.77×.
 
 ---
 
+## The outperformance signal
+
+v2 **does** ship a buy/pass signal — but it predicts a different, answerable
+question, and it never appears without its evidence.
+
+**What it predicts:** P(this item beats the market over the hold), where "the
+market" is the median MOIC of everything bought the same year.
+
+That reframing is what makes it usable. Predicting raw MOIC scored 0.751
+ROC-AUC, but nearly all of it came from `buy_year` — the model had learned the
+2020–21 bubble, and `buy_year` can't extrapolate to a future purchase. Strip the
+timing and raw MOIC collapses to 0.587. Dividing by a same-year benchmark removes
+the confound (correlation with `buy_year` falls from −0.301 to 0.000) and leaves
+genuine asset-selection signal:
+
+| | |
+|---|---|
+| ROC-AUC | **0.690** out-of-fold, item-grouped CV |
+| Flagged items beat the market | **74%** |
+| Baseline (any item) | 52% |
+| **Improvement** | **+22 points** |
+| Confidence | ±8 points |
+| Validated on | 260 repeat sales / 65 graded cards |
+
+`buy_year` and `decade_ordinal` are **excluded from the deployed model** — at
+inference `buy_year` would be the current year, outside the 2004–2026 training
+range, so the model would extrapolate on its most influential input.
+
+**Scope gate.** Graded cards only. Asked about a game-worn jersey the model would
+still emit a number and it would be meaningless, so `buySignal()` refuses and
+explains why. Refusing is the correct output.
+
+**Every number ships with its evidence.** A bare "68%" reads as accuracy. The UI
+renders the lift, the baseline, the sample size and the CI beside it, plus the
+reminder that roughly 1 in 4 flagged items still underperforms.
+
+### Discount-to-comps is NOT a buy signal
+
+Worth recording, because it's counterintuitive. Tested against 130 real repeat
+sales:
+
+```
+asking vs comps      n    % beat market
+<0.7x (discount)    26        53.9%
+0.9-1.1x (market)   17        47.1%
+1.1-1.4x            30        60.0%   <- best bucket
+>1.4x (premium)     31        45.2%
+
+Spearman correlation: -0.033        as a classifier: ROC-AUC 0.539
+```
+
+No monotonic relationship, and the best bucket was buying at a *premium*. A
+discount usually reflects something real about the lot — weaker eye appeal within
+the grade, a thin auction, soft demand that week. The UI shows price-vs-comps as
+**information about price level**, explicitly not as a recommendation.
+
+### Python/TypeScript parity is enforced
+
+Inference runs in the browser from `public/model/buy-signal.json` (exported
+coefficients + transform parameters — Logistic Regression is
+`sigmoid(w·x + b)`, so this is exact, not approximated).
+
+```bash
+npm run verify-parity     # replays 12 real inputs, fails above 1e-9
+```
+
+Current worst difference: **1.1e-16**. This test exists because v1 shipped a
+silent mismatch — training used `np.log10(price)`, the TypeScript used
+`Math.log1p(price)`. The exporter also refuses to write if the reconstructed
+column order disagrees with the pipeline's, which is how `SimpleImputer` silently
+dropping an all-missing column (`comp_median_30d`) would otherwise have
+misaligned every coefficient after index 10.
+
+**Run `npm run verify-parity` in CI.**
+
+## Refreshing everything
+
+```bash
+npm run refresh-data      # comps + buy model + parity check
+```
+
 ## Not yet done
 
-- **Buy/not-buy is not back.** The best honest model on real repeat sales is
-  ROC-AUC 0.72 ± 0.13 with precision ~0.31 — a BUY signal wrong roughly 7 times
-  in 10 — and its strongest feature is `buy_year`, i.e. the market cycle, which
-  can't extrapolate. Revisit once repeat-sale pairs are in the thousands.
 - **Accuracy badges on the marketing pages** still quote v1's numbers ("78% /
   0.87" from synthetic data, "88.9% / 97.5%" from the 89-row rank-matched set).
-  Those should be replaced with dataset facts — sales counts and date coverage.
+  Replace with the table above, which is measured.
+- **More repeat-sale pairs.** 260 pairs across 65 items is what makes the ±8pt
+  interval wide. Note that broad scraping barely helps: measured pair yield is
+  0.87 per sale at REA (which resells the same iconic cards for 20+ years) versus
+  0.08 at Fanatics. Targeted collection of specific high-turnover cards is the
+  lever, not volume.
 - **Saving valuation lookups to Supabase.** The `predictions` table matches v1's
   shape; storing comps lookups needs a migration. `src/lib/model/types.ts` is
   kept solely so the existing dashboard can read historical rows.

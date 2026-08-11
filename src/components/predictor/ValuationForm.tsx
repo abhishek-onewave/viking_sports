@@ -30,6 +30,14 @@ import {
   type CompsMeta,
   type ValuationResult,
 } from '@/lib/valuation/types';
+import {
+  buySignal,
+  isOutOfScope,
+  loadBuyModel,
+  type BuySignal,
+  type BuySignalModel,
+  type OutOfScope,
+} from '@/lib/valuation/buySignal';
 
 const FIELD =
   'w-full rounded-lg border border-viking-charcoal/60 bg-viking-deep/60 px-4 py-3 ' +
@@ -58,6 +66,8 @@ export default function ValuationForm() {
   const [askingPrice, setAskingPrice] = useState('');
 
   const [result, setResult] = useState<ValuationResult | null>(null);
+  const [signal, setSignal] = useState<BuySignal | OutOfScope | null>(null);
+  const [buyModel, setBuyModel] = useState<BuySignalModel | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
@@ -67,6 +77,8 @@ export default function ValuationForm() {
         setMeta(m);
       })
       .catch((e: Error) => setLoadError(e.message));
+    // the signal is optional — if it fails to load the comps still work
+    loadBuyModel().then(setBuyModel).catch(() => setBuyModel(null));
   }, []);
 
   const playerSuggestions = useMemo(
@@ -89,9 +101,25 @@ export default function ValuationForm() {
       grade: grade ? Number(grade) : null,
       askingPrice: askingPrice ? Number(askingPrice.replace(/[^0-9.]/g, '')) : null,
     };
-    setResult(valuate(lots, q));
+    const res = valuate(lots, q);
+    setResult(res);
     setShowAll(false);
-  }, [lots, player, itemYear, setName, cardNumber, grader, grade, askingPrice]);
+
+    setSignal(
+      buyModel
+        ? buySignal(buyModel, {
+            askingPrice: q.askingPrice ?? 0,
+            grade: q.grade,
+            grader: q.grader,
+            itemYear: q.itemYear,
+            // the comps decide the asset class, falling back to a card
+            assetType: res.comps[0]?.a ?? 'Cards (Non-Rookie)',
+            comps: res.comps,
+            stats: res.stats,
+          })
+        : null,
+    );
+  }, [lots, buyModel, player, itemYear, setName, cardNumber, grader, grade, askingPrice]);
 
   if (loadError) {
     return (
@@ -330,6 +358,91 @@ export default function ValuationForm() {
                 )}
               </div>
 
+              {/* ---------------------------------------- buy / pass signal
+                  Every number here ships with its evidence: the lift over the
+                  base rate, the sample it was validated on, and the confidence
+                  interval. A bare "68%" reads as accuracy; "68% — flagged items
+                  beat the market 74% of the time vs a 52% baseline, ±8pts on
+                  260 pairs" is a claim someone can actually check. */}
+              {signal && (
+                isOutOfScope(signal) ? (
+                  <div className="rounded-2xl border border-viking-charcoal/60 bg-viking-charcoal/10 p-5">
+                    <p className="text-sm uppercase tracking-wide text-viking-steel">
+                      Outperformance signal
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-viking-steel">
+                      {signal.reason}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className={`rounded-2xl border p-6 ${
+                      signal.verdict === 'favourable'
+                        ? 'border-green-500/40 bg-green-500/5'
+                        : signal.verdict === 'unfavourable'
+                          ? 'border-red-500/40 bg-red-500/5'
+                          : 'border-viking-gold/30 bg-viking-gold/5'
+                    }`}
+                  >
+                    <p className="text-sm uppercase tracking-wide text-viking-steel">
+                      Outperformance signal
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
+                      <span
+                        className={`font-[family-name:var(--font-display)] text-3xl font-bold ${
+                          signal.verdict === 'favourable'
+                            ? 'text-green-400'
+                            : signal.verdict === 'unfavourable'
+                              ? 'text-red-400'
+                              : 'text-viking-gold'
+                        }`}
+                      >
+                        {(signal.probability * 100).toFixed(0)}%
+                      </span>
+                      <span className="text-sm text-viking-parchment">
+                        probability of beating the market over the hold
+                      </span>
+                    </div>
+
+                    {/* the evidence, never separated from the number */}
+                    <div className="mt-4 grid grid-cols-2 gap-4 border-t border-viking-charcoal/50 pt-4 sm:grid-cols-4">
+                      {[
+                        ['Flagged items beat market',
+                         `${(signal.evidence.precision_out_of_fold * 100).toFixed(0)}%`],
+                        ['Baseline (any item)',
+                         `${(signal.evidence.base_rate * 100).toFixed(0)}%`],
+                        ['Improvement',
+                         `+${signal.evidence.lift_points.toFixed(0)} pts`],
+                        ['Confidence',
+                         `±${signal.evidence.precision_ci_points} pts`],
+                      ].map(([k, v]) => (
+                        <div key={k}>
+                          <p className="text-xs uppercase tracking-wide text-viking-steel/70">{k}</p>
+                          <p className="mt-0.5 text-sm font-medium text-viking-parchment">{v}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-xs leading-relaxed text-viking-steel/80">
+                      Validated on {signal.evidence.n_pairs} verified repeat sales
+                      across {signal.evidence.n_items} graded cards
+                      (ROC-AUC {signal.evidence.roc_auc.toFixed(2)}). Predicts
+                      relative performance versus the market, not an absolute
+                      return multiple. Roughly 1 in 4 flagged items still
+                      underperforms.
+                    </p>
+                    {signal.caveats.length > 0 && (
+                      <ul className="mt-3 space-y-1.5 border-t border-viking-charcoal/50 pt-3">
+                        {signal.caveats.map((cv) => (
+                          <li key={cv} className="text-xs leading-relaxed text-viking-steel/80">
+                            · {cv}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )
+              )}
+
               {/* asking price comparison */}
               {result.relative && (
                 <div className="rounded-2xl border border-viking-charcoal/60 bg-viking-charcoal/20 p-6">
@@ -355,11 +468,24 @@ export default function ValuationForm() {
                   </div>
                   <p className="mt-2 text-sm text-viking-steel">
                     {result.relative.verdict === 'below-comps' &&
-                      'Priced below where comparable examples have sold. Worth a closer look — verify condition and authenticity.'}
+                      'Priced below where comparable examples have sold.'}
                     {result.relative.verdict === 'in-line' &&
                       'Roughly in line with comparable sales.'}
                     {result.relative.verdict === 'above-comps' &&
                       'Priced above where comparable examples have sold.'}
+                  </p>
+                  {/* Deliberately NOT framed as a buy signal. Tested against
+                      130 real repeat sales, discount-to-comps did not predict
+                      returns: Spearman correlation -0.03, and as a classifier
+                      it scored 0.539 ROC-AUC — chance. Deep discounts beat the
+                      market 54% of the time versus 45% for premiums, with no
+                      monotonic trend in between. Useful context about price
+                      level; not evidence of future performance. */}
+                  <p className="mt-2 text-xs leading-relaxed text-viking-steel/70">
+                    Price level only. In our repeat-sales data, buying below
+                    comparables did not by itself predict better returns — a
+                    discount usually reflects something about the specific lot.
+                    Use the outperformance signal above for that question.
                   </p>
                 </div>
               )}
