@@ -36,3 +36,6 @@ next-env.d.ts
 
 # model source (keep the exported JSON, not the pkl)
 scripts/*.pkl
+
+# model artifacts (pickles — never served publicly)
+/model_artifacts/

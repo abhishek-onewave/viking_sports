@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import PredictionForm from './PredictionForm';
+import ValuationForm from './ValuationForm';
 
 export default function PredictorSection() {
   return (
@@ -17,12 +17,13 @@ export default function PredictorSection() {
           <h2 className="font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-gradient-gold md:text-5xl">
             Deal Analyzer
           </h2>
-          <p className="mt-4 text-lg text-viking-steel max-w-xl mx-auto">
-            Enter deal parameters to get an AI-powered investment recommendation
+          <p className="mt-4 text-lg text-viking-steel max-w-2xl mx-auto">
+            Identify an item to see what comparable examples have actually sold
+            for, and how an asking price compares.
           </p>
         </motion.div>
 
-        <PredictionForm />
+        <ValuationForm />
       </div>
 
       {/* Subtle background texture */}

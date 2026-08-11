@@ -1,0 +1,56 @@
+{
+  "generated": "2026-08-11 14:24",
+  "source_db": "/Users/abhi4518/Desktop/onewave/vk_data_scrap/data/auction_lots.db",
+  "n_sales": 7347,
+  "date_range": [
+    "2004-04-01",
+    "2026-08-04"
+  ],
+  "by_source": {
+    "sothebys": 192,
+    "rea": 996,
+    "lelands": 2061,
+    "fanatics": 2120,
+    "greyflannel": 1978
+  },
+  "by_asset_type": {
+    "Game-Worn Jerseys": 1400,
+    "(unclassified)": 420,
+    "Memorabilia": 716,
+    "Game-Used Equipment": 776,
+    "Game-Worn Shoes": 82,
+    "Cards (Non-Rookie)": 2830,
+    "Rookie Cards": 636,
+    "Sealed Wax": 91,
+    "Coins & Currency": 56,
+    "Complete Sets": 88,
+    "Stickers": 16,
+    "Tickets & Passes": 127,
+    "Publications": 109
+  },
+  "identifiable": {
+    "with_player": 5272,
+    "with_grade": 3064,
+    "with_card_no": 3044,
+    "fully_fingerprinted": 1194
+  },
+  "key_map": {
+    "t": "title",
+    "p": "player",
+    "y": "item year",
+    "s": "set",
+    "c": "card number",
+    "g": "grader",
+    "gr": "grade",
+    "a": "asset type",
+    "pr": "sale price (USD)",
+    "d": "sale date",
+    "src": "auction house",
+    "u": "lot url"
+  },
+  "notes": [
+    "Every row is an observed auction result. No modelled or synthetic values appear in this file.",
+    "Hunt lots are absent: that site gates realized prices behind a login, so it contributes no comparable prices.",
+    "Re-run scripts/export_comps.py after each weekly scrape, then redeploy, to refresh."
+  ]
+}

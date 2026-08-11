@@ -1,0 +1,66 @@
+{
+  "task": "regression \u2014 log1p(sale_price); fair value, NOT future return",
+  "trained_on": "real scraped auction results only (no synthetic data)",
+  "n_rows": 7347,
+  "date_range": [
+    "2004-04-01",
+    "2026-08-04"
+  ],
+  "features": [
+    "year",
+    "grade",
+    "item_age",
+    "sale_year",
+    "player_freq",
+    "has_grade",
+    "set_name",
+    "grader",
+    "asset_type",
+    "source"
+  ],
+  "model": "XGBoost",
+  "cv_5fold": {
+    "Baseline (mean)": {
+      "r2": -0.0005,
+      "mae": 2.0454,
+      "median_x_error": 5.421
+    },
+    "Ridge": {
+      "r2": 0.7647,
+      "mae": 0.9659,
+      "median_x_error": 2.221
+    },
+    "Random Forest": {
+      "r2": 0.8331,
+      "mae": 0.7716,
+      "median_x_error": 1.767
+    },
+    "Gradient Boosting": {
+      "r2": 0.818,
+      "mae": 0.8387,
+      "median_x_error": 1.965
+    },
+    "HistGradientBoosting": {
+      "r2": 0.8316,
+      "mae": 0.7903,
+      "median_x_error": 1.833
+    },
+    "XGBoost": {
+      "r2": 0.8362,
+      "mae": 0.7762,
+      "median_x_error": 1.801
+    }
+  },
+  "holdout_20pct": {
+    "r2": 0.8363,
+    "median_x_error": 1.773,
+    "n_test": 1470
+  },
+  "caveats": [
+    "Predicts fair value. It cannot tell you an item will 3x.",
+    "Typical prediction is off by ~1.773x \u2014 a screen for human review, not an execution signal.",
+    "`source` carries ~0.68 of feature importance: the model leans on which auction house a lot is at. Without it R2 falls to ~0.750.",
+    "Each source covers a narrow date window, so the model encodes those windows' price levels and drifts. Retrain after each scrape.",
+    "The app's primary output is observed comparable sales (public/data/comps.json); this model is the fallback for items with no exact comps."
+  ]
+}

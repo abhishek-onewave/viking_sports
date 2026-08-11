@@ -1,3 +1,20 @@
+/**
+ * DEPRECATED — kept only so the Supabase `predictions` table and the dashboard
+ * can still read historical rows.
+ *
+ * The buy/not-buy classifier these types served has been retired. It was
+ * trained on 12,000 synthetic rows whose labels came from a hand-written
+ * formula, and that formula's strongest assumption ("Rookie Cards +0.30, Cards
+ * Non-Rookie -0.08") is inverted in real repeat-sale data: non-rookie cards
+ * showed median MOIC 1.32 / 22% >=2x versus rookies at 0.95 / 17%.
+ *
+ * It also could not work in principle: these inputs describe a CATEGORY, and
+ * one category combination held 94 real deals ranging from 0.36x to 5.12x.
+ *
+ * Live analysis now lives in src/lib/valuation/, which reports observed
+ * comparable sales instead of a predicted verdict. Do not add to this file.
+ */
+
 export interface PredictionInput {
   assetType: string;
   holdYears: number;
