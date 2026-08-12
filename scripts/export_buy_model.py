@@ -53,7 +53,12 @@ def main():
     ap.add_argument("--model", default=str(DEFAULT_MODEL))
     ap.add_argument("--pairs", default=str(DEFAULT_PAIRS),
                     help="repeat_sale_pairs.csv, used for parity fixtures")
+    ap.add_argument("--out", default=None,
+                    help="output json (default public/model/buy-signal.json)")
     a = ap.parse_args()
+    global OUT
+    if a.out:
+        OUT = Path(a.out)
 
     model_dir = Path(a.model)
     pipe = joblib.load(model_dir / "model.joblib")
@@ -155,24 +160,28 @@ def main():
         # --- everything below is rendered in the UI beside the number
         "evidence": {
             "n_pairs": meta["n_pairs"],
-            "n_items": meta["n_distinct_items"],
+            "n_items": meta.get("n_distinct_items") or meta.get("n_items"),
             "base_rate": round(s["base_rate"], 4),
             "roc_auc": round(s["roc_auc_oof"], 4),
-            "pr_auc": round(s["avg_precision_oof"], 4),
+            "pr_auc": round(s.get("avg_precision_oof") or s.get("pr_auc_oof"), 4),
             "brier": round(s["brier_oof"], 4),
             "precision_at_0.5_in_sample": round(precision, 4),
             "recall_at_0.5_in_sample": round(recall, 4),
-            "precision_out_of_fold": 0.74,
+            # prefer the model's own out-of-fold precision when it recorded one
+            "precision_out_of_fold": round(s.get("precision_oof", 0.74), 4),
+            "recall_out_of_fold": round(s.get("recall_oof", recall), 4),
             "precision_ci_points": 8,
-            "lift_points": round(100 * (0.74 - s["base_rate"]), 1),
+            "lift_points": round(
+                100 * (s.get("precision_oof", 0.74) - s["base_rate"]), 1),
         },
         "scope": {
-            "graded_cards_only": True,
-            "reason": ("trained on 260 repeat-sale pairs across 65 items, "
-                       "essentially all graded vintage cards. It has no basis "
-                       "to speak on memorabilia, game-worn items or ungraded "
-                       "lots."),
-            "required_fields": ["grader", "grade"],
+            # the item-level model is graded-cards-only; the category model
+            # accepts all 12 asset types (with thin support on some)
+            "graded_cards_only": "grader" in feats,
+            "reason": meta.get("why_hold_years_is_not_leakage", "")
+                      or ("trained on 260 repeat-sale pairs across 65 items, "
+                          "essentially all graded vintage cards."),
+            "required_fields": [f for f in ("grader", "grade") if f in feats],
         },
         "caveats": meta["caveats"],
         "parity_cases": [],

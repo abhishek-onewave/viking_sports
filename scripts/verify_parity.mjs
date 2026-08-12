@@ -21,9 +21,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const model = JSON.parse(
-  readFileSync(join(HERE, "..", "public", "model", "buy-signal.json"), "utf8"),
-);
+const MODELS = ["buy-signal.json", "portfolio-signal.json"];
 
 function score(m, raw) {
   const vec = new Map();
@@ -49,10 +47,13 @@ function score(m, raw) {
 }
 
 const TOL = 1e-9;
-let worst = 0;
 let failures = 0;
+let worstOverall = 0;
 
-console.log(`parity check: ${model.parity_cases.length} cases, tolerance ${TOL}`);
+for (const file of MODELS) {
+const model = JSON.parse(readFileSync(join(HERE, "..", "public", "model", file), "utf8"));
+let worst = 0;
+console.log(`\n=== ${file} — ${model.parity_cases.length} cases, tolerance ${TOL}`);
 console.log(`  ${"case".padEnd(6)}${"python".padStart(14)}${"typescript".padStart(14)}${"diff".padStart(12)}`);
 
 model.parity_cases.forEach((c, i) => {
@@ -86,9 +87,13 @@ if (model.output_names.length !== model.coef.length) {
   failures++;
 }
 
-console.log(`\nworst difference: ${worst.toExponential(3)}`);
+console.log(`  worst difference: ${worst.toExponential(3)}`);
+worstOverall = Math.max(worstOverall, worst);
+}
+
+console.log(`\nworst difference across all models: ${worstOverall.toExponential(3)}`);
 if (failures) {
   console.error(`FAILED — ${failures} problem(s). Do not deploy.`);
   process.exit(1);
 }
-console.log("PASS — TypeScript inference matches Python exactly.");
+console.log("PASS — TypeScript inference matches Python exactly for all models.");

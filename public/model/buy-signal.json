@@ -205,12 +205,13 @@
     "precision_at_0.5_in_sample": 0.7353,
     "recall_at_0.5_in_sample": 0.7407,
     "precision_out_of_fold": 0.74,
+    "recall_out_of_fold": 0.7407,
     "precision_ci_points": 8,
     "lift_points": 22.1
   },
   "scope": {
     "graded_cards_only": true,
-    "reason": "trained on 260 repeat-sale pairs across 65 items, essentially all graded vintage cards. It has no basis to speak on memorabilia, game-worn items or ungraded lots.",
+    "reason": "trained on 260 repeat-sale pairs across 65 items, essentially all graded vintage cards.",
     "required_fields": [
       "grader",
       "grade"

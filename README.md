@@ -2,15 +2,16 @@
 
 Sports-memorabilia deal analysis built on **real auction results**.
 
-The Deal Analyzer takes a specific item and shows what comparable examples have
-actually sold for. Every figure on screen traces to a real lot you can open.
+Two analyzers: a **buy/pass signal** for a type of deal, and a **comparable-sales
+lookup** for a specific card. Every figure traces to a real auction result, and
+every prediction ships with the sample size and lift behind it.
 
 ---
 
 ## What changed in v2, and why
 
-**v1 predicted BUY / NOT BUY. v2 shows comparable sales.** That's a deliberate
-downgrade in ambition, for two measured reasons.
+**v2 still predicts BUY / PASS — but on a question that's answerable, with a
+model trained on real data.** Two things were wrong with v1.
 
 ### 1. The v1 model was trained on invented data
 
@@ -53,10 +54,11 @@ fields:
 ```
 
 94 deals give byte-identical form answers and range from losing 64% to gaining
-412%. No model can separate inputs that are identical — returns are determined
-by *which* card, not which category.
+412%. No model can separate inputs that are identical.
 
-v2's form asks for player, year, set, card number, grader and grade.
+v2 keeps that form (it predicts a category **base rate** well — 0.782 ROC-AUC)
+but says plainly that it's a category estimate, and adds an Item Lookup that
+identifies a specific card by player, year, set, card number and grade.
 
 ### Also fixed
 
@@ -163,7 +165,57 @@ Holdout (n=1,470): R² 0.836, median error 1.77×.
 
 ---
 
-## The outperformance signal
+## Two analyzers
+
+`Deal Analyzer` is the original five-field form — asset type, hold period,
+purchase price, acquisition year, deal status — restored, but behind a model
+trained on 260 real repeat sales instead of 12,000 synthetic rows.
+
+`Item Lookup` identifies a specific card and shows its actual comparable sales.
+
+Measured on the same pairs, same grouped CV, same market-relative target:
+
+| analyzer | features | ROC-AUC | prec | rec |
+|---|---|---|---|---|
+| **Deal Analyzer** | asset type + hold + price + year | **0.782 ± 0.051** | 0.75 | 0.73 |
+| Item Lookup signal | grade + item year + comps | 0.690 ± 0.071 | 0.74 | 0.62 |
+
+The category inputs score **higher**, with tighter variance. Most of that comes
+from `hold_years`, which the item-level model excludes — and that exclusion is
+right for one question and wrong for another:
+
+- *"Should I buy this lot?"* — hold period unknown, so using it is leakage
+- *"If I hold 5 years, will it beat the market?"* — the **user** supplies it, so
+  it's a scenario input
+
+The Deal Analyzer answers the second. Neither analyzer subsumes the other: the
+first shapes a portfolio, the second prices a lot.
+
+### What the Deal Analyzer cannot do
+
+Distinguish two items in the same category. Grouped by those exact five inputs,
+one combination in the real data held **94 pairs ranging 0.36x to 5.12x**. It
+estimates a base rate for a *type* of deal. The UI says so, next to the result.
+
+### Only 3 of 12 asset types have data
+
+```
+Cards (Non-Rookie)   133 pairs
+Rookie Cards         109 pairs
+Memorabilia           18 pairs   (thin — flagged in the UI)
+the other nine          0 pairs
+```
+
+For the nine with no data the one-hot column doesn't exist, so the model would
+score off its intercept — a number with no basis. `portfolioSignal()` **refuses**
+and names what's supported. The list is derived from the model file at load time,
+so it stays true as the dataset grows.
+
+`is_realized` is collected but is **not a feature**: every repeat-sale pair is
+realized by construction, so the column is constant in training. The UI says
+this rather than pretending the toggle matters.
+
+## The item-level outperformance signal
 
 v2 **does** ship a buy/pass signal — but it predicts a different, answerable
 question, and it never appears without its evidence.

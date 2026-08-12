@@ -1,0 +1,210 @@
+{
+  "generated_from": "/Users/abhi4518/Desktop/onewave/vk_data_scrap/models/portfolio_current",
+  "model": "LogisticRegression(class_weight='balanced', max_iter=5000, random_state=42)",
+  "predicts": "P(item beats the market over the hold)",
+  "target": "excess_moic >= 1.0",
+  "target_meaning": "beats the market \u2014 item MOIC divided by the median MOIC of everything bought the same year",
+  "features": [
+    "hold_years",
+    "log_buy_price",
+    "buy_year",
+    "asset_type"
+  ],
+  "output_names": [
+    "num__hold_years",
+    "num__log_buy_price",
+    "num__buy_year",
+    "cat__asset_type_Cards (Non-Rookie)",
+    "cat__asset_type_Memorabilia",
+    "cat__asset_type_Rookie Cards"
+  ],
+  "numeric": {
+    "columns": [
+      "hold_years",
+      "log_buy_price",
+      "buy_year"
+    ],
+    "impute_median": [
+      2.001368925393566,
+      11.338583982516496,
+      2021.0
+    ],
+    "mean": [
+      2.354172589901543,
+      11.438115706049079,
+      2020.6923076923076
+    ],
+    "scale": [
+      1.827002085932456,
+      0.6994324848255079,
+      2.889892608721097
+    ],
+    "output_names": [
+      "num__hold_years",
+      "num__log_buy_price",
+      "num__buy_year"
+    ],
+    "dropped_all_missing": []
+  },
+  "categorical": {
+    "columns": [
+      "asset_type"
+    ],
+    "fill_value": "NA",
+    "maps": [
+      {
+        "column": "asset_type",
+        "category_to_output": {
+          "Cards (Non-Rookie)": "cat__asset_type_Cards (Non-Rookie)",
+          "Memorabilia": "cat__asset_type_Memorabilia",
+          "Rookie Cards": "cat__asset_type_Rookie Cards"
+        },
+        "infrequent_output": null
+      }
+    ]
+  },
+  "coef": [
+    0.864662010593576,
+    -1.1039861664278947,
+    0.26851327283869064,
+    0.3851977733529054,
+    0.30718979527282975,
+    -0.6944936734933842
+  ],
+  "intercept": 0.14971203648187353,
+  "evidence": {
+    "n_pairs": 260,
+    "n_items": 65,
+    "base_rate": 0.5192,
+    "roc_auc": 0.7822,
+    "pr_auc": 0.7763,
+    "brier": 0.192,
+    "precision_at_0.5_in_sample": 0.7597,
+    "recall_at_0.5_in_sample": 0.7259,
+    "precision_out_of_fold": 0.7481,
+    "recall_out_of_fold": 0.7259,
+    "precision_ci_points": 8,
+    "lift_points": 22.9
+  },
+  "scope": {
+    "graded_cards_only": false,
+    "reason": "The user supplies the hold period, so it is a scenario input: 'if I hold for N years, will this beat the market?'. The item-level model excludes it because there the question is 'should I buy this lot?', where the hold is unknown.",
+    "required_fields": []
+  },
+  "caveats": [
+    "Predicts a BASE RATE for a category and hold period. It cannot distinguish two items in the same category: grouped by these inputs, one combination held 94 real pairs ranging 0.36x to 5.12x.",
+    "135 positives from 65 distinct items. Treat the interval, not the point estimate.",
+    "Trained on graded-card repeat sales. Categories like Game-Worn Jerseys and Publications have little or no support in the data.",
+    "Raw MOIC >= 3x is NOT offered: only 16 of 260 pairs clear it and precision collapses to 0.12. The market-relative target is the answerable version of the same question."
+  ],
+  "parity_cases": [
+    {
+      "input": {
+        "hold_years": 3.0006844626967832,
+        "log_buy_price": 10.884179296093862,
+        "buy_year": 2013,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.4802100430352928
+    },
+    {
+      "input": {
+        "hold_years": 4.501026694045175,
+        "log_buy_price": 10.884179296093862,
+        "buy_year": 2013,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.6526851376631814
+    },
+    {
+      "input": {
+        "hold_years": 1.5003422313483916,
+        "log_buy_price": 11.95761769646754,
+        "buy_year": 2016,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.09931671764451509
+    },
+    {
+      "input": {
+        "hold_years": 2.9979466119096507,
+        "log_buy_price": 11.864996828675356,
+        "buy_year": 2012,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.15167333751006573
+    },
+    {
+      "input": {
+        "hold_years": 3.0006844626967832,
+        "log_buy_price": 11.31753082660842,
+        "buy_year": 2007,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.21070315669679116
+    },
+    {
+      "input": {
+        "hold_years": 10.50239561943874,
+        "log_buy_price": 11.31753082660842,
+        "buy_year": 2007,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.9028788534551774
+    },
+    {
+      "input": {
+        "hold_years": 7.501711156741957,
+        "log_buy_price": 11.31753082660842,
+        "buy_year": 2010,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.7480510129961249
+    },
+    {
+      "input": {
+        "hold_years": 0.7474332648870636,
+        "log_buy_price": 11.302216779257382,
+        "buy_year": 2021,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.5043957661319034
+    },
+    {
+      "input": {
+        "hold_years": 0.999315537303217,
+        "log_buy_price": 10.950824090522444,
+        "buy_year": 2017,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.5792687106582668
+    },
+    {
+      "input": {
+        "hold_years": 5.9986310746064335,
+        "log_buy_price": 11.695255355062796,
+        "buy_year": 2017,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.8191763093811423
+    },
+    {
+      "input": {
+        "hold_years": 0.999315537303217,
+        "log_buy_price": 11.302216779257382,
+        "buy_year": 2022,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.5571753193782074
+    },
+    {
+      "input": {
+        "hold_years": 2.4996577686516086,
+        "log_buy_price": 11.790564777297387,
+        "buy_year": 2018,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.4494982899370372
+    }
+  ]
+}
