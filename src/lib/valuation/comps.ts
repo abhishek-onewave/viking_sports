@@ -22,7 +22,7 @@ import type {
   ValuationResult,
 } from "./types";
 
-let cache: CompLot[] | null = null;
+const shardCache = new Map<string, CompLot[]>();
 let metaCache: CompsMeta | null = null;
 
 const norm = (s: string | null | undefined): string =>
@@ -31,13 +31,35 @@ const norm = (s: string | null | undefined): string =>
 const normCard = (s: string | null | undefined): string =>
   (s ?? "").replace(/^#/, "").trim().toUpperCase();
 
-export async function loadComps(): Promise<CompLot[]> {
-  if (cache) return cache;
-  const res = await fetch("/data/comps.json");
-  if (!res.ok) throw new Error(`could not load comps index (${res.status})`);
+/**
+ * Comps are SHARDED by the player's first letter.
+ *
+ * A single bundle hit 15.7 MB once SCP's 41k lots landed — far too much to
+ * fetch on page load. Every lookup begins with a player name, so the browser
+ * only ever needs one shard: the largest ('m') is 342 KB gzipped, and most are
+ * far smaller. Shards are cached after first use.
+ */
+function shardKey(player: string): string {
+  const c = norm(player).charAt(0);
+  return /[a-z]/.test(c) ? c : "_";
+}
+
+export async function loadShard(player: string): Promise<CompLot[]> {
+  const key = shardKey(player);
+  const hit = shardCache.get(key);
+  if (hit) return hit;
+  const res = await fetch(`/data/comps/${key}.json`);
+  if (!res.ok) {
+    // a missing shard means no players with that initial — not an error
+    if (res.status === 404) {
+      shardCache.set(key, []);
+      return [];
+    }
+    throw new Error(`could not load comps shard '${key}' (${res.status})`);
+  }
   const data: CompsIndex = await res.json();
-  cache = data.lots;
-  return cache;
+  shardCache.set(key, data.lots);
+  return data.lots;
 }
 
 export async function loadCompsMeta(): Promise<CompsMeta> {

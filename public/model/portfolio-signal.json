@@ -15,8 +15,14 @@
     "num__log_buy_price",
     "num__buy_year",
     "cat__asset_type_Cards (Non-Rookie)",
+    "cat__asset_type_Coins & Currency",
+    "cat__asset_type_Complete Sets",
+    "cat__asset_type_Game-Used Equipment",
     "cat__asset_type_Memorabilia",
-    "cat__asset_type_Rookie Cards"
+    "cat__asset_type_Publications",
+    "cat__asset_type_Rookie Cards",
+    "cat__asset_type_Stickers",
+    "cat__asset_type_infrequent_sklearn"
   ],
   "numeric": {
     "columns": [
@@ -25,19 +31,19 @@
       "buy_year"
     ],
     "impute_median": [
-      2.001368925393566,
-      11.338583982516496,
-      2021.0
+      3.1047227926078027,
+      7.409863012128405,
+      2016.0
     ],
     "mean": [
-      2.354172589901543,
-      11.438115706049079,
-      2020.6923076923076
+      4.340630545969355,
+      8.038277685889337,
+      2015.9607614607614
     ],
     "scale": [
-      1.827002085932456,
-      0.6994324848255079,
-      2.889892608721097
+      3.8215059328941474,
+      1.9194877911971884,
+      4.754135193742342
     ],
     "output_names": [
       "num__hold_years",
@@ -56,35 +62,46 @@
         "column": "asset_type",
         "category_to_output": {
           "Cards (Non-Rookie)": "cat__asset_type_Cards (Non-Rookie)",
+          "Coins & Currency": "cat__asset_type_Coins & Currency",
+          "Complete Sets": "cat__asset_type_Complete Sets",
+          "Game-Used Equipment": "cat__asset_type_Game-Used Equipment",
           "Memorabilia": "cat__asset_type_Memorabilia",
-          "Rookie Cards": "cat__asset_type_Rookie Cards"
+          "Publications": "cat__asset_type_Publications",
+          "Rookie Cards": "cat__asset_type_Rookie Cards",
+          "Stickers": "cat__asset_type_Stickers"
         },
-        "infrequent_output": null
+        "infrequent_output": "cat__asset_type_infrequent_sklearn"
       }
     ]
   },
   "coef": [
-    0.864662010593576,
-    -1.1039861664278947,
-    0.26851327283869064,
-    0.3851977733529054,
-    0.30718979527282975,
-    -0.6944936734933842
+    1.2325703191314998,
+    -0.22172498183078293,
+    0.6398137776058758,
+    0.006286887483859778,
+    0.3554186799224547,
+    -0.7739293833412659,
+    0.723159685874998,
+    -0.37340941633348584,
+    -0.7727230481484486,
+    0.11601911813285418,
+    0.2054364691201386,
+    0.5026031173649077
   ],
-  "intercept": 0.14971203648187353,
+  "intercept": -0.027906256131704634,
   "evidence": {
-    "n_pairs": 260,
-    "n_items": 65,
-    "base_rate": 0.5192,
-    "roc_auc": 0.7822,
-    "pr_auc": 0.7763,
-    "brier": 0.192,
-    "precision_at_0.5_in_sample": 0.7597,
-    "recall_at_0.5_in_sample": 0.7259,
-    "precision_out_of_fold": 0.7481,
-    "recall_out_of_fold": 0.7259,
+    "n_pairs": 2574,
+    "n_items": 734,
+    "base_rate": 0.5027,
+    "roc_auc": 0.7507,
+    "pr_auc": 0.7494,
+    "brier": 0.2023,
+    "precision_at_0.5_in_sample": 0.7025,
+    "recall_at_0.5_in_sample": 0.6623,
+    "precision_out_of_fold": 0.6888,
+    "recall_out_of_fold": 0.6484,
     "precision_ci_points": 8,
-    "lift_points": 22.9
+    "lift_points": 18.6
   },
   "scope": {
     "graded_cards_only": false,
@@ -93,118 +110,118 @@
   },
   "caveats": [
     "Predicts a BASE RATE for a category and hold period. It cannot distinguish two items in the same category: grouped by these inputs, one combination held 94 real pairs ranging 0.36x to 5.12x.",
-    "135 positives from 65 distinct items. Treat the interval, not the point estimate.",
+    "1294 positives from 734 distinct items. Treat the interval, not the point estimate.",
     "Trained on graded-card repeat sales. Categories like Game-Worn Jerseys and Publications have little or no support in the data.",
     "Raw MOIC >= 3x is NOT offered: only 16 of 260 pairs clear it and precision collapses to 0.12. The market-relative target is the answerable version of the same question."
   ],
   "parity_cases": [
     {
       "input": {
-        "hold_years": 3.0006844626967832,
-        "log_buy_price": 10.884179296093862,
-        "buy_year": 2013,
-        "asset_type": "Rookie Cards"
+        "hold_years": 0.4654346338124572,
+        "log_buy_price": 6.280021236970423,
+        "buy_year": 2011,
+        "asset_type": "Cards (Non-Rookie)"
       },
-      "expected_proba": 0.4802100430352928
+      "expected_proba": 0.1498182187195959
     },
     {
       "input": {
-        "hold_years": 4.501026694045175,
-        "log_buy_price": 10.884179296093862,
-        "buy_year": 2013,
-        "asset_type": "Rookie Cards"
+        "hold_years": 2.2286105407255303,
+        "log_buy_price": 6.280021236970423,
+        "buy_year": 2011,
+        "asset_type": "Cards (Non-Rookie)"
       },
-      "expected_proba": 0.6526851376631814
+      "expected_proba": 0.23733592099209785
     },
     {
       "input": {
-        "hold_years": 1.5003422313483916,
-        "log_buy_price": 11.95761769646754,
-        "buy_year": 2016,
-        "asset_type": "Rookie Cards"
+        "hold_years": 2.6694045174537986,
+        "log_buy_price": 6.280021236970423,
+        "buy_year": 2011,
+        "asset_type": "Cards (Non-Rookie)"
       },
-      "expected_proba": 0.09931671764451509
+      "expected_proba": 0.26402165766547
     },
     {
       "input": {
-        "hold_years": 2.9979466119096507,
-        "log_buy_price": 11.864996828675356,
+        "hold_years": 1.7631759069130732,
+        "log_buy_price": 6.471727865291332,
         "buy_year": 2012,
-        "asset_type": "Rookie Cards"
-      },
-      "expected_proba": 0.15167333751006573
-    },
-    {
-      "input": {
-        "hold_years": 3.0006844626967832,
-        "log_buy_price": 11.31753082660842,
-        "buy_year": 2007,
-        "asset_type": "Rookie Cards"
-      },
-      "expected_proba": 0.21070315669679116
-    },
-    {
-      "input": {
-        "hold_years": 10.50239561943874,
-        "log_buy_price": 11.31753082660842,
-        "buy_year": 2007,
-        "asset_type": "Rookie Cards"
-      },
-      "expected_proba": 0.9028788534551774
-    },
-    {
-      "input": {
-        "hold_years": 7.501711156741957,
-        "log_buy_price": 11.31753082660842,
-        "buy_year": 2010,
-        "asset_type": "Rookie Cards"
-      },
-      "expected_proba": 0.7480510129961249
-    },
-    {
-      "input": {
-        "hold_years": 0.7474332648870636,
-        "log_buy_price": 11.302216779257382,
-        "buy_year": 2021,
         "asset_type": "Cards (Non-Rookie)"
       },
-      "expected_proba": 0.5043957661319034
+      "expected_proba": 0.23058263370666607
     },
     {
       "input": {
-        "hold_years": 0.999315537303217,
-        "log_buy_price": 10.950824090522444,
+        "hold_years": 2.2039698836413417,
+        "log_buy_price": 6.471727865291332,
+        "buy_year": 2012,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.2567646821332625
+    },
+    {
+      "input": {
+        "hold_years": 0.4407939767282683,
+        "log_buy_price": 6.261873290889306,
+        "buy_year": 2013,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.18652988608273166
+    },
+    {
+      "input": {
+        "hold_years": 3.890485968514716,
+        "log_buy_price": 8.233290634256464,
         "buy_year": 2017,
         "asset_type": "Cards (Non-Rookie)"
       },
-      "expected_proba": 0.5792687106582668
+      "expected_proba": 0.48763450012199233
     },
     {
       "input": {
-        "hold_years": 5.9986310746064335,
-        "log_buy_price": 11.695255355062796,
-        "buy_year": 2017,
+        "hold_years": 10.316221765913758,
+        "log_buy_price": 11.39289565721062,
+        "buy_year": 2012,
         "asset_type": "Cards (Non-Rookie)"
       },
-      "expected_proba": 0.8191763093811423
+      "expected_proba": 0.7281343617864844
     },
     {
       "input": {
-        "hold_years": 0.999315537303217,
-        "log_buy_price": 11.302216779257382,
+        "hold_years": 11.274469541409994,
+        "log_buy_price": 11.39289565721062,
+        "buy_year": 2012,
+        "asset_type": "Cards (Non-Rookie)"
+      },
+      "expected_proba": 0.7848650522199456
+    },
+    {
+      "input": {
+        "hold_years": 0.9582477754962354,
+        "log_buy_price": 6.6697518647609035,
         "buy_year": 2022,
-        "asset_type": "Cards (Non-Rookie)"
+        "asset_type": "Rookie Cards"
       },
-      "expected_proba": 0.5571753193782074
+      "expected_proba": 0.49200587580194816
     },
     {
       "input": {
-        "hold_years": 2.4996577686516086,
-        "log_buy_price": 11.790564777297387,
-        "buy_year": 2018,
-        "asset_type": "Cards (Non-Rookie)"
+        "hold_years": 0.6707734428473648,
+        "log_buy_price": 6.398594934535208,
+        "buy_year": 2025,
+        "asset_type": "Rookie Cards"
       },
-      "expected_proba": 0.4494982899370372
+      "expected_proba": 0.5769740191333107
+    },
+    {
+      "input": {
+        "hold_years": 0.9007529089664612,
+        "log_buy_price": 6.7655002314012656,
+        "buy_year": 2022,
+        "asset_type": "Rookie Cards"
+      },
+      "expected_proba": 0.4846089932173
     }
   ]
 }

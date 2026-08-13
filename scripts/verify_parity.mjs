@@ -16,12 +16,23 @@
  * check stays runnable with plain node and has no build step. If the two ever
  * drift apart this test is the thing that notices.
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const MODELS = ["buy-signal.json", "portfolio-signal.json"];
+// Whatever *-signal.json the exporter produced. Discovering them beats a
+// hardcoded list: the item-level classifier was dropped from the browser (as
+// Logistic Regression it scored 0.598 against a 0.503 baseline — chance), and a
+// stale filename here would have failed the build for the wrong reason.
+const MODEL_DIR = join(HERE, "..", "public", "model");
+const MODELS = existsSync(MODEL_DIR)
+  ? readdirSync(MODEL_DIR).filter((f) => f.endsWith("-signal.json")).sort()
+  : [];
+if (MODELS.length === 0) {
+  console.error("No *-signal.json found in public/model — run npm run export-buy-model");
+  process.exit(1);
+}
 
 function score(m, raw) {
   const vec = new Map();

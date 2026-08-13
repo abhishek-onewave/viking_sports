@@ -129,13 +129,23 @@ missing — it exits with an error instead. That's intentional.
 
 | | |
 |---|---|
-| Real priced sales | **7,347** |
+| Real priced sales | **44,590** |
 | Date range | 2004-04-01 → 2026-08-04 |
-| Sources | fanatics 2,120 · lelands 2,061 · greyflannel 1,978 · rea 996 · sothebys 192 |
-| Fully identifiable (player+year+set+card#+grade) | 1,194 |
+| Sources | scp 37,199 · fanatics 2,139 · lelands 2,061 · greyflannel 2,003 · rea 996 · sothebys 192 |
+| Fully identifiable | 6,830 |
+| **Repeat-sale pairs** | **2,574** across 734 distinct items |
 
-Hunt is absent: it gates realized prices behind a login, so it contributes no
-comparable prices.
+SCP Auctions supplies 83% of it. Its listing pages carry title, lot number and
+realized price for 48 lots per request, so 41,138 lots cost ~1,650 requests —
+every other source needs one request per lot.
+
+Hunt is absent: it gates realized prices behind a login.
+
+### Comps are sharded
+
+`public/data/comps/<initial>.json`, split by the player's first letter. A single
+bundle reached 15.7 MB; every lookup starts from a player name, so the browser
+fetches one shard — largest is 342 KB gzipped.
 
 ### Fair-value fallback model
 
@@ -143,13 +153,16 @@ Trained on the 7,347 real sales, target `log1p(sale_price)`:
 
 | model | R² (log $) | median × error |
 |---|---|---|
-| **XGBoost** | **0.836** | **1.77×** |
-| Random Forest | 0.833 | 1.77× |
-| HistGradientBoosting | 0.832 | 1.83× |
-| Ridge | 0.765 | 2.22× |
-| Baseline (mean) | 0.000 | 5.42× |
+| **XGBoost** | **0.742** | **1.77×** |
+| HistGradientBoosting | 0.744 | 1.78× |
+| Random Forest | 0.745 | 1.74× |
 
-Holdout (n=1,470): R² 0.836, median error 1.77×.
+Holdout (n=2,483): R² 0.742, median error 1.77×.
+
+**R² fell from 0.916 to 0.742 when the dataset grew 4×.** The earlier figure came
+from 3,087 rows in a narrow price band; with 12,415 graded rows spanning
+2010–2026 the problem is genuinely harder. 0.742 is the honest number, and
+median dollar error barely moved (1.62× → 1.77×).
 
 **Carry these caveats into any UI that surfaces it:**
 
@@ -232,12 +245,12 @@ genuine asset-selection signal:
 
 | | |
 |---|---|
-| ROC-AUC | **0.690** out-of-fold, item-grouped CV |
-| Flagged items beat the market | **74%** |
-| Baseline (any item) | 52% |
-| **Improvement** | **+22 points** |
-| Confidence | ±8 points |
-| Validated on | 260 repeat sales / 65 graded cards |
+| ROC-AUC | **0.751** out-of-fold, item-grouped CV |
+| Flagged deals beat the market | **69%** |
+| Baseline (any deal) | 50% |
+| **Improvement** | **+19 points** |
+| Confidence | ±0.023 (was ±0.076 at 260 pairs) |
+| Validated on | 2,574 repeat sales / 734 items |
 
 `buy_year` and `decade_ordinal` are **excluded from the deployed model** — at
 inference `buy_year` would be the current year, outside the 2004–2026 training

@@ -96,8 +96,32 @@ def main():
             "u": url,
         })
 
-    index_path = out_dir / "comps.json"
-    index_path.write_text(json.dumps({"lots": lots}, separators=(",", ":")))
+    # SHARDED BY PLAYER INITIAL.
+    # A single file reached 15.7 MB once SCP's 41k lots landed — too much to
+    # fetch on page load, and it only grows. Every lookup starts from a player
+    # name, so sharding on the first letter means the browser downloads ~1/26th
+    # of the corpus. Rows with no parsed player go in "_" and are only needed
+    # for the unfiltered case.
+    shards: dict[str, list] = {}
+    for lot in lots:
+        key = (lot["p"] or "_")[:1]
+        if not key.isalpha():
+            key = "_"
+        shards.setdefault(key, []).append(lot)
+
+    shard_dir = out_dir / "comps"
+    shard_dir.mkdir(parents=True, exist_ok=True)
+    for old in shard_dir.glob("*.json"):
+        old.unlink()
+    sizes = {}
+    for key, rows_ in sorted(shards.items()):
+        p = shard_dir / f"{key}.json"
+        p.write_text(json.dumps({"lots": rows_}, separators=(",", ":")))
+        sizes[key] = {"lots": len(rows_), "bytes": p.stat().st_size}
+
+    index_path = out_dir / "comps-index.json"
+    index_path.write_text(json.dumps(
+        {"shards": sizes, "total_lots": len(lots)}, indent=2))
 
     dated = [l["d"] for l in lots if l["d"]]
     meta = {
@@ -133,8 +157,14 @@ def main():
     }
     (out_dir / "comps-meta.json").write_text(json.dumps(meta, indent=2))
 
-    size = index_path.stat().st_size
-    print(f"wrote {index_path}  ({size/1048576:.2f} MB)")
+    total = sum(v["bytes"] for v in sizes.values())
+    biggest = max(sizes.items(), key=lambda kv: kv[1]["bytes"])
+    print(f"wrote {len(sizes)} shards under {shard_dir}  "
+          f"({total/1048576:.1f} MB total)")
+    print(f"  largest shard: '{biggest[0]}' "
+          f"{biggest[1]['bytes']/1048576:.2f} MB / {biggest[1]['lots']:,} lots"
+          f"  <- this is what a lookup actually downloads")
+    print(f"wrote {index_path}")
     print(f"wrote {out_dir/'comps-meta.json'}")
     print(f"  date range        : {meta['date_range'][0]} .. {meta['date_range'][1]}")
     print(f"  fully identifiable: {meta['identifiable']['fully_fingerprinted']:,}")

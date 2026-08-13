@@ -1,38 +1,39 @@
 {
-  "generated": "2026-08-11 14:24",
+  "generated": "2026-08-13 08:57",
   "source_db": "/Users/abhi4518/Desktop/onewave/vk_data_scrap/data/auction_lots.db",
-  "n_sales": 7347,
+  "n_sales": 44590,
   "date_range": [
     "2004-04-01",
     "2026-08-04"
   ],
   "by_source": {
     "sothebys": 192,
+    "fanatics": 2139,
+    "scp": 37199,
     "rea": 996,
     "lelands": 2061,
-    "fanatics": 2120,
-    "greyflannel": 1978
+    "greyflannel": 2003
   },
   "by_asset_type": {
-    "Game-Worn Jerseys": 1400,
-    "(unclassified)": 420,
-    "Memorabilia": 716,
-    "Game-Used Equipment": 776,
-    "Game-Worn Shoes": 82,
-    "Cards (Non-Rookie)": 2830,
-    "Rookie Cards": 636,
-    "Sealed Wax": 91,
-    "Coins & Currency": 56,
-    "Complete Sets": 88,
-    "Stickers": 16,
-    "Tickets & Passes": 127,
-    "Publications": 109
+    "Game-Worn Jerseys": 5253,
+    "Cards (Non-Rookie)": 14001,
+    "(unclassified)": 3868,
+    "Memorabilia": 9138,
+    "Game-Used Equipment": 3629,
+    "Game-Worn Shoes": 878,
+    "Publications": 1285,
+    "Coins & Currency": 735,
+    "Rookie Cards": 2033,
+    "Tickets & Passes": 1550,
+    "Complete Sets": 1779,
+    "Sealed Wax": 344,
+    "Stickers": 97
   },
   "identifiable": {
-    "with_player": 5272,
-    "with_grade": 3064,
-    "with_card_no": 3044,
-    "fully_fingerprinted": 1194
+    "with_player": 41273,
+    "with_grade": 12409,
+    "with_card_no": 10261,
+    "fully_fingerprinted": 6830
   },
   "key_map": {
     "t": "title",
