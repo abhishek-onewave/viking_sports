@@ -43,8 +43,8 @@ export default function Header() {
           href="#"
           className="flex items-center gap-2 font-[family-name:var(--font-display)] font-bold text-lg tracking-tight"
         >
-          <span className="text-viking-gold">VIKING</span>
-          <span className="text-viking-snow">SPORTS</span>
+          <span className="text-viking-gold">VAL</span>
+          <span className="text-viking-snow">HALLA</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-8">

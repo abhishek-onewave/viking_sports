@@ -68,7 +68,7 @@ export default function SignupPage() {
         Create Account
       </h1>
       <p className="mt-2 text-sm text-viking-steel text-center">
-        Join Viking Sports to start analyzing deals
+        Join Valhalla to start analyzing deals
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">

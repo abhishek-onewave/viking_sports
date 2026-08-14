@@ -7,7 +7,7 @@ const features = [
   {
     title: 'Historical Data',
     description:
-      'Trained on 89 real sports memorabilia deals spanning 4 decades of market history',
+      'Built on 44,596 verified auction results from six houses, 2004-2026 — every figure traces to a real lot',
     icon: (
       <svg
         className="h-7 w-7"
@@ -27,7 +27,7 @@ const features = [
   {
     title: 'ML Analysis',
     description:
-      'XGBoost gradient boosting model with 88.9% test accuracy and 97.5% AUC-ROC score',
+      'Validated on 2,574 repeat sales of the same items. Flagged deals beat the market 69% of the time against a 50% baseline — a 19-point edge, measured to within 2 points',
     icon: (
       <svg
         className="h-7 w-7"
@@ -66,11 +66,13 @@ const features = [
   },
 ];
 
-const stats = [
-  { label: 'Deals Analyzed', target: 89, suffix: '' },
-  { label: 'Asset Types', target: 13, suffix: '' },
-  { label: 'Accuracy', target: 88.9, suffix: '%', decimals: 1 },
-  { label: 'AUC Score', target: 97.5, suffix: '%', decimals: 1 },
+const stats: {
+  label: string; target: number; suffix: string; decimals?: number;
+}[] = [
+  { label: 'Verified Sales', target: 44596, suffix: '' },
+  { label: 'Repeat-Sale Pairs', target: 2574, suffix: '' },
+  { label: 'Years of Data', target: 22, suffix: '' },
+  { label: 'Edge vs Baseline', target: 19, suffix: ' pts' },
 ];
 
 function AnimatedCounter({

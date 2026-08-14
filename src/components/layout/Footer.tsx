@@ -18,7 +18,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-viking-iron/20 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-viking-steel/40">
-            &copy; {new Date().getFullYear()} Viking Sports. All rights
+            &copy; {new Date().getFullYear()} Valhalla. All rights
             reserved.
           </p>
           <p className="text-xs text-viking-steel/40">

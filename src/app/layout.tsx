@@ -3,9 +3,9 @@ import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Viking Sports | AI-Powered Collectibles Intelligence",
+  title: "Valhalla | Collectibles Market Intelligence",
   description:
-    "Machine learning predictions for sports memorabilia investments. Powered by XGBoost analysis of historical collectible deal data.",
+    "Collectibles market intelligence built on 44,596 verified auction results, 2004-2026. Comparable sales, fair value, and a deal signal validated on 2,574 repeat sales.",
   keywords: [
     "sports memorabilia",
     "collectibles",
