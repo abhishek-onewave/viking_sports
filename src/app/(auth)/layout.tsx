@@ -7,8 +7,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <a href="/" className="flex items-center justify-center gap-2 mb-10 font-[family-name:var(--font-display)] font-bold text-xl tracking-tight">
-          <span className="text-viking-gold">VIKING</span>
-          <span className="text-viking-snow">SPORTS</span>
+          <span className="text-viking-gold">VAL</span>
+          <span className="text-viking-snow">HALLA</span>
         </a>
 
         {children}

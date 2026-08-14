@@ -209,15 +209,15 @@ export default function FloatingCard() {
             </mesh>
           ))}
 
-          {/* VIKING text */}
+          {/* VAL text — gold half of the wordmark */}
           <Text position={[0, 0.72, 0.06]} fontSize={0.36} letterSpacing={0.22} anchorX="center" anchorY="middle">
-            VIKING
+            VAL
             <meshStandardMaterial color="#D4A843" emissive="#E8B84B" emissiveIntensity={0.6} metalness={0.8} />
           </Text>
 
-          {/* SPORTS text */}
-          <Text position={[0, 0.26, 0.06]} fontSize={0.26} letterSpacing={0.18} anchorX="center" anchorY="middle">
-            SPORTS
+          {/* HALLA text — white half, sized to stay within the 1.8-wide card */}
+          <Text position={[0, 0.26, 0.06]} fontSize={0.24} letterSpacing={0.16} anchorX="center" anchorY="middle">
+            HALLA
             <meshStandardMaterial color="#F1F5F9" emissive="#7DD3FC" emissiveIntensity={0.2} />
           </Text>
 
