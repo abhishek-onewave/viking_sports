@@ -20,7 +20,9 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 
-const MODEL_API_URL = (process.env.MODEL_API_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
+const RAW_URL = process.env.MODEL_API_URL;
+const MODEL_API_URL = (RAW_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
+const IS_CONFIGURED = Boolean(RAW_URL);
 const ENDPOINT = '/api/v1/card-investment/predict';
 const TIMEOUT_MS = Number(process.env.MODEL_API_TIMEOUT_MS ?? 25_000);
 
@@ -28,6 +30,15 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  if (!IS_CONFIGURED) {
+    console.warn('[card-investment] MODEL_API_URL is not set');
+    return NextResponse.json(
+      { error: 'not_configured',
+        detail: 'Analysis is not configured on this deployment.' },
+      { status: 503 },
+    );
+  }
+
   let payload: unknown;
   try {
     payload = await req.json();

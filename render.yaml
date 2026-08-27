@@ -1,0 +1,37 @@
+# Render blueprint for the Card Investment Model v3 service.
+#
+# The model is 9.5 MB of XGBoost + CatBoost boosters and its Python runtime is
+# ~536 MB installed. Vercel serverless functions cap at 250 MB unzipped, so the
+# model cannot live with the Next.js app — it runs here and Vercel calls it.
+#
+# Deploy:  Render dashboard -> New -> Blueprint -> pick this repo
+services:
+  - type: web
+    name: viking-card-model-v3
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # Free instances sleep after 15 min; the first request then pays a cold
+    # start AND the bundle load. Starter keeps it warm, which is the difference
+    # between a 1s and a 60s first prediction.
+    plan: starter
+    region: oregon
+    healthCheckPath: /api/v1/card-investment/health
+    autoDeploy: false
+    envVars:
+      - key: PORT
+        value: 8000
+      # One bundle per worker (~9.5 MB + deserialized boosters), so keep this low
+      # rather than tying it to core count.
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: PREDICT_TIMEOUT_SECONDS
+        value: 20
+      - key: LOG_LEVEL
+        value: INFO
+      # NOT required for this architecture: the browser never calls this service
+      # directly. Next.js proxies server-side, and a server-to-server fetch sends
+      # no Origin header, so CORS never engages. Set it only if you later expose
+      # the service to browsers.
+      # - key: ALLOWED_ORIGINS
+      #   value: https://your-app.vercel.app
