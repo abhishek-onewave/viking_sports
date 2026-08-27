@@ -36,3 +36,7 @@ next-env.d.ts
 
 # model source (keep the exported JSON, not the pkl)
 scripts/*.pkl
+# Python model service
+backend/.venv
+backend/**/__pycache__
+backend/.pytest_cache

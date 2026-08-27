@@ -23,6 +23,27 @@ export default function PredictorSection() {
         </motion.div>
 
         <PredictionForm />
+
+        {/* Card Investment Model v3 lives on its own route: it scores a specific
+            card against real comparable sales, whereas the analyzer above works
+            at the deal level. Linked rather than merged so neither is disturbed. */}
+        <div className="mt-12 rounded-2xl border border-viking-gold/20 bg-viking-gold/5 px-6 py-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <p className="text-sm font-semibold text-viking-snow">
+              Analysing a specific card?
+            </p>
+            <p className="mt-1 text-sm text-viking-steel">
+              Card Investment Model v3 matches an exact card to comparable sales and
+              returns a maximum recommended purchase price.
+            </p>
+          </div>
+          <a
+            href="/analysis"
+            className="mt-4 inline-block shrink-0 rounded-xl bg-viking-gold px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-viking-deep transition-colors hover:bg-viking-amber sm:mt-0"
+          >
+            Open card analysis
+          </a>
+        </div>
       </div>
 
       {/* Subtle background texture */}

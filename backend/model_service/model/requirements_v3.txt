@@ -1,0 +1,7 @@
+numpy>=2.0
+pandas>=2.0
+scipy>=1.10
+scikit-learn>=1.4
+xgboost>=2.0
+catboost>=1.2
+joblib>=1.3
