@@ -6,9 +6,13 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { signOut } from "@/lib/supabase/auth";
 
+// Hash links only resolve on the landing page; `route: true` entries are real
+// pages and use next/link so they work from anywhere in the app.
 const NAV_LINKS = [
   { label: "About", href: "#about" },
   { label: "Analyzer", href: "#predictor" },
+  { label: "Indexes", href: "/indexes", route: true },
+  { label: "Analysis", href: "/analysis", route: true },
   { label: "History", href: "#dashboard" },
 ];
 
@@ -48,15 +52,25 @@ export default function Header() {
         </a>
 
         <nav className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm text-viking-steel hover:text-viking-snow transition-colors duration-200"
-            >
-              {link.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.route ? (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm text-viking-steel hover:text-viking-snow transition-colors duration-200"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm text-viking-steel hover:text-viking-snow transition-colors duration-200"
+              >
+                {link.label}
+              </a>
+            )
+          )}
           <a
             href="#predictor"
             className="text-sm font-medium bg-viking-gold/10 text-viking-gold border border-viking-gold/20 rounded-lg px-4 py-2 hover:bg-viking-gold/20 transition-all duration-200"
