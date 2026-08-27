@@ -10,8 +10,14 @@
 import { NextResponse } from 'next/server';
 
 const RAW_URL = process.env.MODEL_API_URL;
-const MODEL_API_URL = (RAW_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
-const IS_CONFIGURED = Boolean(RAW_URL);
+const LOCAL_DEFAULT = 'http://127.0.0.1:8000';
+const MODEL_API_URL = (RAW_URL ?? LOCAL_DEFAULT).replace(/\/$/, '');
+// In development an unset MODEL_API_URL is normal: the service runs on
+// localhost:8000 alongside `npm run dev`, so the default IS the configuration.
+// In production it is a deploy mistake — 127.0.0.1 on a Vercel host is nothing,
+// and falling back silently is what made a missing env var look like a broken
+// model. So the guard applies to production only.
+const IS_CONFIGURED = Boolean(RAW_URL) || process.env.NODE_ENV !== 'production';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
