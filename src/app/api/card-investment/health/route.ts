@@ -25,6 +25,10 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   if (!IS_CONFIGURED) {
     // Deliberately not a 500: nothing is broken, the deploy is incomplete.
+    // Reporting WHICH environment is running is the difference between a
+    // five-minute fix and an afternoon: a Vercel env var scoped to Production
+    // only is invisible to a branch (Preview) deploy, and the symptom is
+    // identical to never having set it at all.
     console.warn('[card-investment] MODEL_API_URL is not set — the model ' +
                  'service cannot be reached from this deployment.');
     return NextResponse.json(
@@ -34,7 +38,13 @@ export async function GET() {
         model_loaded: false,
         market_data_as_of: null,
         configured: false,
-        detail: 'MODEL_API_URL is not set on this deployment.',
+        environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? 'unknown',
+        deployment: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+        detail:
+          'MODEL_API_URL is not set for this environment. On Vercel an ' +
+          'environment variable must be enabled for the environment being ' +
+          'viewed (Preview for a branch deploy), and the deployment must be ' +
+          'rebuilt after adding it.',
       },
       { status: 503 },
     );
@@ -48,7 +58,11 @@ export async function GET() {
       cache: 'no-store',
     });
     const json = await res.json();
-    return NextResponse.json({ ...json, configured: true }, { status: res.status });
+    return NextResponse.json(
+      { ...json, configured: true,
+        environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? 'unknown' },
+      { status: res.status },
+    );
   } catch {
     // Shaped like the service's own unhealthy response so the client needs only
     // one code path.
