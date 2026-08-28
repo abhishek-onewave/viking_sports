@@ -20,15 +20,31 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 
-const RAW_URL = process.env.MODEL_API_URL;
-const LOCAL_DEFAULT = 'http://127.0.0.1:8000';
-const MODEL_API_URL = (RAW_URL ?? LOCAL_DEFAULT).replace(/\/$/, '');
-// In development an unset MODEL_API_URL is normal: the service runs on
-// localhost:8000 alongside `npm run dev`, so the default IS the configuration.
-// In production it is a deploy mistake — 127.0.0.1 on a Vercel host is nothing,
-// and falling back silently is what made a missing env var look like a broken
-// model. So the guard applies to production only.
-const IS_CONFIGURED = Boolean(RAW_URL) || process.env.NODE_ENV !== 'production';
+/**
+ * Resolve the model service PER REQUEST, never at module scope.
+ *
+ * A module-level `const X = process.env.Y` is evaluated once, when the module
+ * is first loaded. That is fine locally but fragile on a serverless platform:
+ * the value gets captured into a warm instance and, depending on how the
+ * bundler treats server env access, can be baked at build time. Reading inside
+ * the handler means setting the variable and redeploying ALWAYS takes effect,
+ * and removes a whole class of "I set it and nothing changed".
+ */
+function resolveService() {
+  const raw = process.env.MODEL_API_URL;
+  const isProd = process.env.VERCEL_ENV
+    ? process.env.VERCEL_ENV !== 'development'
+    : process.env.NODE_ENV === 'production';
+  return {
+    url: (raw ?? 'http://127.0.0.1:8000').replace(/\/$/, ''),
+    // In development an unset value is normal: the service runs on localhost
+    // beside `npm run dev`. In production 127.0.0.1 is nothing.
+    configured: Boolean(raw) || !isProd,
+    environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? 'unknown',
+    deployment: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+  };
+}
+
 const ENDPOINT = '/api/v1/card-investment/predict';
 const TIMEOUT_MS = Number(process.env.MODEL_API_TIMEOUT_MS ?? 25_000);
 
@@ -36,11 +52,20 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  if (!IS_CONFIGURED) {
-    console.warn('[card-investment] MODEL_API_URL is not set');
+  const svc = resolveService();
+  if (!svc.configured) {
+    console.warn('[card-investment] MODEL_API_URL is not set for env=%s branch=%s',
+                 svc.environment, svc.deployment);
     return NextResponse.json(
-      { error: 'not_configured',
-        detail: 'Analysis is not configured on this deployment.' },
+      {
+        error: 'not_configured',
+        detail:
+          `MODEL_API_URL is not set for the "${svc.environment}" environment. ` +
+          'On Vercel a variable must be enabled for the environment being ' +
+          'viewed, and the deployment rebuilt afterwards.',
+        environment: svc.environment,
+        deployment: svc.deployment,
+      },
       { status: 503 },
     );
   }
@@ -70,7 +95,7 @@ export async function POST(req: NextRequest) {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(`${MODEL_API_URL}${ENDPOINT}`, {
+    const res = await fetch(`${svc.url}${ENDPOINT}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(forwarded),

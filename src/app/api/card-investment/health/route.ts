@@ -9,21 +9,38 @@
  */
 import { NextResponse } from 'next/server';
 
-const RAW_URL = process.env.MODEL_API_URL;
-const LOCAL_DEFAULT = 'http://127.0.0.1:8000';
-const MODEL_API_URL = (RAW_URL ?? LOCAL_DEFAULT).replace(/\/$/, '');
-// In development an unset MODEL_API_URL is normal: the service runs on
-// localhost:8000 alongside `npm run dev`, so the default IS the configuration.
-// In production it is a deploy mistake — 127.0.0.1 on a Vercel host is nothing,
-// and falling back silently is what made a missing env var look like a broken
-// model. So the guard applies to production only.
-const IS_CONFIGURED = Boolean(RAW_URL) || process.env.NODE_ENV !== 'production';
+/**
+ * Resolve the model service PER REQUEST, never at module scope.
+ *
+ * A module-level `const X = process.env.Y` is evaluated once, when the module
+ * is first loaded. That is fine locally but fragile on a serverless platform:
+ * the value gets captured into a warm instance and, depending on how the
+ * bundler treats server env access, can be baked at build time. Reading inside
+ * the handler means setting the variable and redeploying ALWAYS takes effect,
+ * and removes a whole class of "I set it and nothing changed".
+ */
+function resolveService() {
+  const raw = process.env.MODEL_API_URL;
+  const isProd = process.env.VERCEL_ENV
+    ? process.env.VERCEL_ENV !== 'development'
+    : process.env.NODE_ENV === 'production';
+  return {
+    url: (raw ?? 'http://127.0.0.1:8000').replace(/\/$/, ''),
+    // In development an unset value is normal: the service runs on localhost
+    // beside `npm run dev`. In production 127.0.0.1 is nothing.
+    configured: Boolean(raw) || !isProd,
+    environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? 'unknown',
+    deployment: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+  };
+}
+
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  if (!IS_CONFIGURED) {
+  const svc = resolveService();
+  if (!svc.configured) {
     // Deliberately not a 500: nothing is broken, the deploy is incomplete.
     // Reporting WHICH environment is running is the difference between a
     // five-minute fix and an afternoon: a Vercel env var scoped to Production
@@ -38,8 +55,8 @@ export async function GET() {
         model_loaded: false,
         market_data_as_of: null,
         configured: false,
-        environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? 'unknown',
-        deployment: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+        environment: svc.environment,
+        deployment: svc.deployment,
         detail:
           'MODEL_API_URL is not set for this environment. On Vercel an ' +
           'environment variable must be enabled for the environment being ' +
@@ -53,14 +70,14 @@ export async function GET() {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 5_000);
   try {
-    const res = await fetch(`${MODEL_API_URL}/api/v1/card-investment/health`, {
+    const res = await fetch(`${svc.url}/api/v1/card-investment/health`, {
       signal: ac.signal,
       cache: 'no-store',
     });
     const json = await res.json();
     return NextResponse.json(
-      { ...json, configured: true,
-        environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? 'unknown' },
+      { ...json, configured: true, environment: svc.environment,
+        deployment: svc.deployment, service_url_host: new URL(svc.url).host },
       { status: res.status },
     );
   } catch {
