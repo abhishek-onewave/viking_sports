@@ -7,7 +7,7 @@ const features = [
   {
     title: 'Historical Data',
     description:
-      'Trained on 89 real sports memorabilia deals spanning 4 decades of market history',
+      'Trained on 147,398 verified purchase-to-sale pairs drawn from 195,431 real repeat sales, 2003-2026',
     icon: (
       <svg
         className="h-7 w-7"
@@ -27,7 +27,7 @@ const features = [
   {
     title: 'ML Analysis',
     description:
-      'XGBoost gradient boosting model with 88.9% test accuracy and 97.5% AUC-ROC score',
+      'XGBoost classifier with a CatBoost valuation blend. 64.0% accuracy and 0.70 ROC-AUC on an untouched 2026 test set',
     icon: (
       <svg
         className="h-7 w-7"
@@ -66,11 +66,13 @@ const features = [
   },
 ];
 
+// Every figure below is measured on the v3 model's untouched 2026 test set.
+// See model_metadata_v3.json. Do not edit without re-reading that file.
 const stats = [
-  { label: 'Deals Analyzed', target: 89, suffix: '' },
-  { label: 'Asset Types', target: 13, suffix: '' },
-  { label: 'Accuracy', target: 88.9, suffix: '%', decimals: 1 },
-  { label: 'AUC Score', target: 97.5, suffix: '%', decimals: 1 },
+  { label: 'Deals Analyzed', target: 147398, suffix: '' },
+  { label: 'Asset Types', target: 3, suffix: '' },
+  { label: 'Accuracy', target: 64.0, suffix: '%', decimals: 1 },
+  { label: 'ROC-AUC', target: 0.70, suffix: '', decimals: 2 },
 ];
 
 function AnimatedCounter({
@@ -107,9 +109,16 @@ function AnimatedCounter({
     return () => cancelAnimationFrame(rafRef.current);
   }, [inView, target]);
 
+  // Thousands separators matter now that a counter can reach 147,398 — the
+  // previous Math.round() rendered it as an unreadable "147398".
+  const shown =
+    decimals > 0
+      ? value.toFixed(decimals)
+      : Math.round(value).toLocaleString('en-US');
+
   return (
     <span className="tabular-nums">
-      {decimals > 0 ? value.toFixed(decimals) : Math.round(value)}
+      {shown}
       {suffix}
     </span>
   );

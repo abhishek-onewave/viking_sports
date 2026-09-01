@@ -42,22 +42,24 @@
     1.2028140822613909
   ],
   "metrics": {
-    "test_accuracy": 0.7783,
-    "test_f1": 0.7757,
-    "test_auc": 0.8673,
-    "test_precision": 0.779,
-    "test_recall": 0.7725,
-    "cv_auc_mean": 0.8683,
-    "cv_auc_std": 0.0039,
-    "cv_acc_mean": 0.7729,
-    "cv_acc_std": 0.0056,
+    "test_accuracy": 0.7738,
+    "test_f1": 0.7735,
+    "test_auc": 0.8717,
+    "test_precision": 0.7687,
+    "test_recall": 0.7783,
+    "cv_auc_mean": 0.8711,
+    "cv_auc_std": 0.0034,
+    "cv_acc_mean": 0.7788,
+    "cv_acc_std": 0.0052,
     "n_train": 9671,
     "n_test": 2418,
     "n_total": 12089,
-    "threshold": 0.5
+    "threshold": 0.5,
+    "algorithm": "XGBoost",
+    "sampling": "None"
   },
-  "n_estimators": 200,
-  "max_depth": 4,
+  "best_algorithm": "XGBoost",
+  "best_sampling": "None",
   "valid_asset_types": [
     "Rookie Cards",
     "Cards (Non-Rookie)",
@@ -85,5 +87,7 @@
     "$500-$5K": 3,
     "$5K-$20K": 4,
     "$20K+": 5
-  }
+  },
+  "n_estimators": 800,
+  "max_depth": 3
 }

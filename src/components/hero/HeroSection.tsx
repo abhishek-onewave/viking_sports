@@ -90,7 +90,7 @@ export default function HeroSection() {
             <motion.div variants={itemVariants} className="mt-5">
               <span className="inline-flex items-center gap-2 rounded-full border border-viking-gold/20 bg-viking-gold/8 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-viking-gold/90">
                 <span className="h-1.5 w-1.5 rounded-full bg-viking-gold animate-pulse" />
-                XGBoost · 78% Accuracy
+                XGBoost + CatBoost · v3
               </span>
             </motion.div>
 
@@ -112,9 +112,9 @@ export default function HeroSection() {
               variants={itemVariants}
               className="mt-6 max-w-[380px] text-[15px] leading-relaxed text-viking-steel"
             >
-              Machine learning predictions for sports memorabilia. Our XGBoost model
-              analyzes asset type, hold period, and market decade to surface
-              investment signals in seconds.
+              Machine learning valuations for sports memorabilia. Our v3 model
+              matches a card to real comparable sales, values it, and returns the
+              maximum you can pay to hit your target return.
             </motion.p>
 
             {/* CTA row */}
@@ -138,9 +138,12 @@ export default function HeroSection() {
             {/* Stat row */}
             <motion.div variants={itemVariants} className="mt-14 flex gap-8">
               {[
-                { value: '78%', label: 'Accuracy' },
-                { value: '0.87', label: 'AUC Score' },
-                { value: '<2s', label: 'Inference' },
+                // Measured, not aspirational. 64.0% is accuracy across ALL
+                // cases; 87.6% is the high-confidence subset, which covers only
+                // 9.6% of them — quoting that alone would overstate the model.
+                { value: '147k', label: 'Deals Analyzed' },
+                { value: '64.0%', label: 'Accuracy' },
+                { value: '0.70', label: 'ROC-AUC' },
               ].map((stat) => (
                 <div key={stat.label} className="group">
                   <div className="text-2xl font-bold text-viking-gold font-display tabular-nums group-hover:text-viking-amber transition-colors">

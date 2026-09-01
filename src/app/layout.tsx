@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Viking Sports | AI-Powered Collectibles Intelligence",
+  title: "Valhalla Sports | AI-Powered Collectibles Intelligence",
   description:
     "Machine learning predictions for sports memorabilia investments. Powered by XGBoost analysis of historical collectible deal data.",
   keywords: [
@@ -35,7 +37,11 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-viking-deep text-viking-snow">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Header />
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

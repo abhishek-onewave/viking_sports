@@ -3,7 +3,7 @@ import IndexesView from '@/components/indexes/IndexesView';
 import { indexData } from '@/lib/indexes';
 
 export const metadata: Metadata = {
-  title: 'Sport Indexes | Viking Sports',
+  title: 'Sport Indexes | Valhalla Sports',
   description:
     'Card Ladder index performance by sport, with the top cards driving each index.',
 };

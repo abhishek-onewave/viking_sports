@@ -10,9 +10,11 @@ import { signOut } from "@/lib/supabase/auth";
 // pages and use next/link so they work from anywhere in the app.
 const NAV_LINKS = [
   { label: "About", href: "#about" },
-  { label: "Analyzer", href: "#predictor" },
+  // One entry for the card analyser, not two. Repointing the old "Analyzer"
+  // (which was #predictor, now removed) at /analysis left it duplicating the
+  // "Analysis" entry — three links to the same page counting the CTA.
+  { label: "Analyzer", href: "/analysis", route: true },
   { label: "Indexes", href: "/indexes", route: true },
-  { label: "Analysis", href: "/analysis", route: true },
   { label: "History", href: "#dashboard" },
 ];
 
@@ -43,13 +45,13 @@ export default function Header() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a
-          href="#"
+        <Link
+          href="/"
           className="flex items-center gap-2 font-[family-name:var(--font-display)] font-bold text-lg tracking-tight"
         >
-          <span className="text-viking-gold">VIKING</span>
+          <span className="text-viking-gold">VALHALLA</span>
           <span className="text-viking-snow">SPORTS</span>
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) =>
@@ -71,12 +73,12 @@ export default function Header() {
               </a>
             )
           )}
-          <a
-            href="#predictor"
+          <Link
+            href="/analysis"
             className="text-sm font-medium bg-viking-gold/10 text-viking-gold border border-viking-gold/20 rounded-lg px-4 py-2 hover:bg-viking-gold/20 transition-all duration-200"
           >
-            Analyze Deal
-          </a>
+            Analyze
+          </Link>
 
           {/* Auth buttons */}
           {!loading && (

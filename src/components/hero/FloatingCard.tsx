@@ -209,9 +209,9 @@ export default function FloatingCard() {
             </mesh>
           ))}
 
-          {/* VIKING text */}
+          {/* VALHALLA text */}
           <Text position={[0, 0.72, 0.06]} fontSize={0.36} letterSpacing={0.22} anchorX="center" anchorY="middle">
-            VIKING
+            VALHALLA
             <meshStandardMaterial color="#D4A843" emissive="#E8B84B" emissiveIntensity={0.6} metalness={0.8} />
           </Text>
 
