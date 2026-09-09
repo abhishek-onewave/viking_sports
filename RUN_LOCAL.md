@@ -55,6 +55,15 @@ Enter **100000** instead and the same card returns **REVIEW**: the price now
 clears the maximum, but the model's confidence falls between the selective
 cutoffs, so it will not act automatically.
 
+## Card Analyzer (Model V4)
+
+The same two processes also serve **http://localhost:3000/card-analyzer** — the
+V4 exact-identity analyzer (Michael Jordan, Mickey Mantle, Tom Brady only).
+Pick a player, optionally a year, search the exact card-grade identity
+(e.g. `1986 — Fleer — #57 — Base — PSA 9`), optionally enter a purchase price,
+and analyze. Only the seven-day holding period is supported; longer horizons
+are shown disabled because the V4 model is not validated for them.
+
 ## Check it from the terminal
 
 ```bash
@@ -68,12 +77,19 @@ curl -s -X POST localhost:3000/api/card-investment/predict \
        "card_name":"1986 Fleer Michael Jordan #57 PSA 10",
        "hold_period":"2 years","purchase_amount":150000,
        "acquisition_year":2026,"deal_status":"unreleased"}'
+
+# Card Analyzer (V4): list supported players, then predict one exact identity
+curl -s localhost:3000/api/card-analyzer/players
+curl -s -X POST localhost:3000/api/card-analyzer/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"grade_uid":"8bccf7a00e6f5ec1819a","purchase_amount":50000,"holding_period_days":7}'
 ```
 
 ## Run the tests
 
 ```bash
-cd backend && .venv/bin/python -m pytest model_service/tests -v   # 25 tests
+cd backend && .venv/bin/python -m pytest model_service/tests -v   # v3 + v4 API suites
+npm test                                                          # analyzer client logic
 ```
 
 ## Troubleshooting

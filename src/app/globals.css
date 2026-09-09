@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Tailwind 4 auto-detects content sources and will happily scan the model
+   service's multi-megabyte joblib bundles, extracting binary garbage as
+   "arbitrary property" class names that then fail the CSS parse. The backend
+   has no Tailwind classes — exclude it from scanning entirely. */
+@source not "../../backend";
+
 @theme {
   --color-viking-navy: #0B1120;
   --color-viking-deep: #070D19;

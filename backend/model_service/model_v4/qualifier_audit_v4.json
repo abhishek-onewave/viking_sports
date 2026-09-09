@@ -1,0 +1,33 @@
+{
+  "raw_sales": 399282,
+  "curated_sales": 131973,
+  "player_sales_status": {
+    "Michael Jordan": "PENDING",
+    "Mickey Mantle": "PENDING",
+    "Tom Brady": "PENDING"
+  },
+  "raw_exact_grade_sales": 131973,
+  "raw_recovered_grade_sales": 31078,
+  "raw_rejected_no_usable_exact_grade": 236231,
+  "raw_duplicate_sales": 0,
+  "qualifier_identities": 69,
+  "hidden_qualifier_identities": 0,
+  "qualifier_sales": 200,
+  "qualifier_counts": {
+    "MC": 18,
+    "MK": 11,
+    "OC": 21,
+    "OF": 2,
+    "PD": 9,
+    "ST": 8
+  },
+  "hidden_qualifier_sales": 113,
+  "database_outlier_rows_reference": 195,
+  "same_identity_year_outlier_sales": 1218,
+  "outlier_sales": 1218,
+  "invalid_sales": 891,
+  "clean_sales": 160629,
+  "clean_identities": 5356,
+  "earliest_sale": "2004-01-07",
+  "latest_sale": "2026-09-08"
+}

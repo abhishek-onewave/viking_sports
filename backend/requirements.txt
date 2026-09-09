@@ -6,3 +6,7 @@ gunicorn>=23.0
 
 # Model runtime — pinned floors from the supplied requirements_v3.txt
 -r model_service/model/requirements_v3.txt
+
+# Card Analyzer (Model V4) — EXACT pins from the supplied requirements_v4.txt.
+# They satisfy the v3 floors above, so one environment serves both bundles.
+-r model_service/model_v4/requirements_v4.txt

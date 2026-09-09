@@ -150,3 +150,36 @@ percentage error**.
 accuracy but on only **9.57%** of cases. Across all cases accuracy is 64.04%.
 Most opportunities will land in REVIEW, and that is the model working as
 designed rather than failing.
+
+## Card Analyzer — Model V4 (same service)
+
+The container also serves the V4 exact-identity model from
+`model_service/model_v4/` (55 MB bundle, loaded once per worker alongside v3):
+
+```
+GET  /api/v1/card-analyzer/health
+GET  /api/v1/card-analyzer/players            three supported players only
+GET  /api/v1/card-analyzer/years?player=…     predictable years, ascending
+GET  /api/v1/card-analyzer/cards?player=…&year=…
+GET  /api/v1/card-analyzer/metadata           freshness, assumptions, holdout metrics
+POST /api/v1/card-analyzer/predict            {grade_uid, purchase_amount?, holding_period_days?}
+```
+
+V4's contract is the OPPOSITE of v3's matcher: there is no fuzzy matching.
+The UI offers only predictable, qualifier-free (no OC/MC/MK/ST/PD/OF) exact
+card-grade identities for Michael Jordan, Mickey Mantle and Tom Brady, and
+prediction requires the exact selected `grade_uid` — a near-miss uid is
+`NOT_FOUND`, never "the closest card". Only the seven-day horizon is supported;
+any other `holding_period_days` returns `UNSUPPORTED_HOLDING_PERIOD` rather
+than an annualized fabrication. Error codes: `NOT_FOUND`, `INSUFFICIENT_DATA`,
+`REJECTED_QUALIFIER`, `UNSUPPORTED_HOLDING_PERIOD`, `INVALID_PURCHASE_AMOUNT`,
+`MODEL_UNAVAILABLE`.
+
+V4 exact dependency pins live in `model_service/model_v4/requirements_v4.txt`
+and satisfy the v3 floors, so one image serves both bundles. Memory note: each
+gunicorn worker now holds both bundles (~65 MB of artifacts plus boosters), so
+keep `WEB_CONCURRENCY` low on small Railway plans.
+
+Do not present the V4 high-confidence figure (89.47% accuracy) as overall
+accuracy — it covers only 2.46% of holdout cases. All-case BUY accuracy is
+69.01%; valuation quality is a 21.58% median absolute percentage error.

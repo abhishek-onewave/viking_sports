@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "export-model": "python3 scripts/export-model.py"
+    "export-model": "python3 scripts/export-model.py",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +38,10 @@
   "devDependencies": {
     "@types/three": "^0.183.1",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.1"
+    "eslint-config-next": "^16.2.1",
+    "vitest": "^5.0.0"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.2.8"
   }
 }

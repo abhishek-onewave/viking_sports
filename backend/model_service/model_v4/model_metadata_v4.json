@@ -1,0 +1,219 @@
+{
+  "version": "4.0",
+  "created_utc": "2026-09-09T17:22:14.901400+00:00",
+  "source_database": "/Users/abhi4518/Desktop/onewave/vk_data_scrap/data/cardladder/player_pilot_3.db",
+  "training_source_table": "raw_sales",
+  "raw_grade_recovery_rule": "existing exact grade_uid OR numeric PSA/BGS/BVG/SGC/CGC/CSG grade explicitly parsed by the scraper as grade_not_in_catalog",
+  "objective": "next-calendar-week exact card-grade median sale valuation",
+  "real_data_only": true,
+  "synthetic_rows": 0,
+  "qualifiers_excluded": [
+    "OC",
+    "MC",
+    "MK",
+    "ST",
+    "PD",
+    "OF"
+  ],
+  "price_outlier_rule": "exclude only price <20% of exact grade identity + calendar-year median when that group has at least 4 sales; high-price observations retained",
+  "audit": {
+    "raw_sales": 399282,
+    "curated_sales": 131973,
+    "player_sales_status": {
+      "Michael Jordan": "PENDING",
+      "Mickey Mantle": "PENDING",
+      "Tom Brady": "PENDING"
+    },
+    "raw_exact_grade_sales": 131973,
+    "raw_recovered_grade_sales": 31078,
+    "raw_rejected_no_usable_exact_grade": 236231,
+    "raw_duplicate_sales": 0,
+    "qualifier_identities": 69,
+    "hidden_qualifier_identities": 0,
+    "qualifier_sales": 200,
+    "qualifier_counts": {
+      "MC": 18,
+      "MK": 11,
+      "OC": 21,
+      "OF": 2,
+      "PD": 9,
+      "ST": 8
+    },
+    "hidden_qualifier_sales": 113,
+    "database_outlier_rows_reference": 195,
+    "same_identity_year_outlier_sales": 1218,
+    "outlier_sales": 1218,
+    "invalid_sales": 891,
+    "clean_sales": 160629,
+    "clean_identities": 5356,
+    "earliest_sale": "2004-01-07",
+    "latest_sale": "2026-09-08"
+  },
+  "weekly_market_observations": 104820,
+  "training_examples": 95707,
+  "train_rows": 77961,
+  "validation_rows": 7643,
+  "calibration_rows": 4691,
+  "test_rows": 5412,
+  "production_refit_rows": 95707,
+  "train_period": [
+    "2004-02-02",
+    "2025-12-29"
+  ],
+  "validation_period": [
+    "2026-01-05",
+    "2026-04-27"
+  ],
+  "calibration_period": [
+    "2026-05-04",
+    "2026-06-29"
+  ],
+  "test_period": [
+    "2026-07-06",
+    "2026-09-07"
+  ],
+  "forecast_week": "2026-09-14",
+  "model": "robust 13-week exact-card baseline plus validation-shrunk XGBoost/CatBoost residual blend",
+  "buy_model": "CatBoost classifier trained on real outcomes with purchase-price decision scenarios",
+  "xgb_weight": 0.35000000000000003,
+  "residual_shrinkage": 0.65,
+  "test_regression_metrics": {
+    "mae": 1242.7031254374074,
+    "rmse": 9275.907517764132,
+    "rmsle": 0.6574871472022162,
+    "log_r2": 0.8696728281097397,
+    "median_absolute_percentage_error": 0.21582022392855088,
+    "mape": 0.36666174912154575,
+    "within_10pct": 0.254249815225425,
+    "within_20pct": 0.4704360679970436,
+    "direction_accuracy": 0.5870288248337029
+  },
+  "per_player_test_metrics": {
+    "Michael Jordan": {
+      "mae": 1041.744156537936,
+      "rmse": 4834.332537656529,
+      "rmsle": 0.6616170763531009,
+      "log_r2": 0.8832268250662217,
+      "median_absolute_percentage_error": 0.23915049338333103,
+      "mape": 0.3468444953402998,
+      "within_10pct": 0.20414617006324667,
+      "within_20pct": 0.4174279690794097,
+      "direction_accuracy": 0.5432185523541813
+    },
+    "Mickey Mantle": {
+      "mae": 1190.5297638009615,
+      "rmse": 17042.811332192123,
+      "rmsle": 0.26164898609955,
+      "log_r2": 0.9565582420485782,
+      "median_absolute_percentage_error": 0.10120685844930138,
+      "mape": 0.1427232073207166,
+      "within_10pct": 0.49560975609756097,
+      "within_20pct": 0.7648780487804878,
+      "direction_accuracy": 0.7082926829268292
+    },
+    "Tom Brady": {
+      "mae": 1648.5479801844886,
+      "rmse": 8112.9968778096145,
+      "rmsle": 0.8150030210785673,
+      "log_r2": 0.8126812986934271,
+      "median_absolute_percentage_error": 0.28831199155110226,
+      "mape": 0.5522145781982987,
+      "within_10pct": 0.1862426995457495,
+      "within_20pct": 0.372485399091499,
+      "direction_accuracy": 0.5872809863724854
+    }
+  },
+  "test_buy_metrics": {
+    "positive_rate": 0.4041019955654102,
+    "decision_threshold": 0.24000000000000007,
+    "accuracy": 0.6901330376940134,
+    "precision": 0.6149684400360685,
+    "recall": 0.6236854138088705,
+    "f1": 0.6192962542565267,
+    "roc_auc": 0.7344090343573548,
+    "selective_coverage": 0.0245750184774575,
+    "selective_accuracy": 0.8947368421052632,
+    "selective_precision": 0.8076923076923077,
+    "selective_recall": 0.7,
+    "selective_f1": 0.75,
+    "selective_n": 133
+  },
+  "validation_buy_metrics": {
+    "positive_rate": 0.3434515242705744,
+    "decision_threshold": 0.24000000000000007,
+    "accuracy": 0.6897814994112259,
+    "precision": 0.5346426623022368,
+    "recall": 0.7466666666666667,
+    "f1": 0.6231123827690351,
+    "roc_auc": 0.7790194158173432
+  },
+  "calibration_buy_metrics": {
+    "positive_rate": 0.3743338307397143,
+    "decision_threshold": 0.24000000000000007,
+    "accuracy": 0.685781283308463,
+    "precision": 0.570079522862823,
+    "recall": 0.6531890660592256,
+    "f1": 0.6088110403397028,
+    "roc_auc": 0.7284935950918341
+  },
+  "selective_thresholds": {
+    "low": 0.08,
+    "high": 0.7600000000000002,
+    "coverage": 0.036452781922830954,
+    "accuracy": 0.8713450292397661,
+    "precision": 0.8709677419354839,
+    "n_auto": 171,
+    "target_met": false
+  },
+  "buy_decision_threshold": 0.24000000000000007,
+  "residual_log_interval_90pct": [
+    -0.5042165148952008,
+    1.0020850229644143
+  ],
+  "transaction_cost_rate": 0.12,
+  "required_annual_return": 0.1,
+  "forecast_days": 7,
+  "categorical_features": [
+    "grade_uid",
+    "card_uid",
+    "player_name",
+    "sport",
+    "card_set",
+    "card_number",
+    "parallel",
+    "grader"
+  ],
+  "numeric_features": [
+    "card_year",
+    "grade_numeric",
+    "is_rookie",
+    "is_auto",
+    "forecast_year",
+    "forecast_month",
+    "forecast_weekofyear",
+    "last_log_price",
+    "weeks_since_last_sale",
+    "history_active_weeks",
+    "history_sale_count",
+    "median_log_price_4w",
+    "median_log_price_13w",
+    "median_log_price_26w",
+    "median_log_price_52w",
+    "sale_count_4w",
+    "sale_count_13w",
+    "sale_count_26w",
+    "sale_count_52w",
+    "active_weeks_13w",
+    "active_weeks_52w",
+    "log_price_volatility_13w",
+    "log_price_volatility_52w",
+    "price_trend_4w_13w",
+    "price_trend_13w_52w"
+  ],
+  "known_limitations": [
+    "Catalog extraction is complete, but sales backfill still contains pending grade identities.",
+    "A target exists only for weeks with at least one verified exact sale; sparse identities have wider uncertainty.",
+    "Sales are identity-level market observations, not certificate-level resales of one physical slab.",
+    "Next-week BUY decisions are highly sensitive to transaction-cost assumptions."
+  ]
+}

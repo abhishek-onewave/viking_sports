@@ -14,6 +14,9 @@ const NAV_LINKS = [
   // (which was #predictor, now removed) at /analysis left it duplicating the
   // "Analysis" entry — three links to the same page counting the CTA.
   { label: "Analyzer", href: "/analysis", route: true },
+  // The V4 exact-identity analyzer lives beside the v3 free-text one: they are
+  // different models with different contracts, so both stay reachable.
+  { label: "Card Analyzer", href: "/card-analyzer", route: true },
   { label: "Indexes", href: "/indexes", route: true },
   { label: "History", href: "#dashboard" },
 ];

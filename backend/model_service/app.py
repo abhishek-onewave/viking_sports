@@ -36,12 +36,18 @@ from fastapi.responses import JSONResponse
 
 try:                                     # package or flat import
     from .model_manager import manager
+    from .model_manager_v4 import (HOLDING_PERIOD_MESSAGE,
+                                   SUPPORTED_HOLDING_PERIOD_DAYS, manager_v4)
     from .schemas import (ErrorResponse, HealthResponse, PredictRequest,
                           PredictResponse)
+    from .schemas_v4 import PredictV4Request
 except ImportError:                      # pragma: no cover
     from model_manager import manager
+    from model_manager_v4 import (HOLDING_PERIOD_MESSAGE,
+                                  SUPPORTED_HOLDING_PERIOD_DAYS, manager_v4)
     from schemas import (ErrorResponse, HealthResponse, PredictRequest,
                          PredictResponse)
+    from schemas_v4 import PredictV4Request
 
 logging.basicConfig(
     level=os.environ.get("LOG_LEVEL", "INFO"),
@@ -49,6 +55,7 @@ logging.basicConfig(
 log = logging.getLogger("model_service")
 
 API_PREFIX = "/api/v1/card-investment"
+API_PREFIX_V4 = "/api/v1/card-analyzer"
 PREDICT_TIMEOUT_SECONDS = float(os.environ.get("PREDICT_TIMEOUT_SECONDS", "20"))
 
 # Fail CLOSED: no env var means localhost dev only, never "*".
@@ -73,6 +80,16 @@ async def lifespan(app: FastAPI):
     except Exception:                                     # noqa: BLE001
         # Do not crash: /health must stay reachable to report WHY it is unhealthy.
         log.exception("startup model load failed — service will report unhealthy")
+    # The v4 analyzer bundle loads independently so one bad bundle cannot take
+    # the other model down with it.
+    try:
+        manager_v4.load()
+        log.info("v4 model ready: version=%s forecast_week=%s loads=%d",
+                 manager_v4.model_version(), manager_v4.forecast_week(),
+                 manager_v4.load_count)
+    except Exception:                                     # noqa: BLE001
+        log.exception("startup v4 model load failed — card analyzer will "
+                      "report unavailable")
     yield
 
 
@@ -235,3 +252,147 @@ async def metadata():
         "median_absolute_percentage_valuation_error": 0.1837,
         "thresholds": manager.thresholds(),
     }
+
+
+# ------------------------------------------------- Card Analyzer (Model V4)
+def _v4_error(code: int, error: str, detail, rid=None) -> JSONResponse:
+    return JSONResponse(status_code=code, content=ErrorResponse(
+        error=error, detail=detail, request_id=rid).model_dump())
+
+
+def _v4_unavailable(rid=None) -> JSONResponse:
+    return _v4_error(status.HTTP_503_SERVICE_UNAVAILABLE, "MODEL_UNAVAILABLE",
+                     "The V4 model is not loaded. Check /api/v1/card-analyzer/health.",
+                     rid)
+
+
+@app.get(f"{API_PREFIX_V4}/health")
+async def v4_health():
+    h = manager_v4.health()
+    code = (status.HTTP_200_OK if h["status"] == "healthy"
+            else status.HTTP_503_SERVICE_UNAVAILABLE)
+    return JSONResponse(status_code=code, content=h)
+
+
+@app.get(f"{API_PREFIX_V4}/players")
+async def v4_players(request: Request):
+    if not manager_v4.loaded:
+        return _v4_unavailable(getattr(request.state, "request_id", None))
+    return {"players": manager_v4.players()}
+
+
+@app.get(f"{API_PREFIX_V4}/years")
+async def v4_years(player: str, request: Request):
+    rid = getattr(request.state, "request_id", None)
+    if not manager_v4.loaded:
+        return _v4_unavailable(rid)
+    player = player.strip()
+    if not manager_v4.has_player(player):
+        return _v4_error(status.HTTP_404_NOT_FOUND, "NOT_FOUND",
+                         f"Unsupported player: {player!r}", rid)
+    return {"player": player, "years": manager_v4.years(player)}
+
+
+@app.get(f"{API_PREFIX_V4}/cards")
+async def v4_cards(player: str, request: Request, year: str | None = None):
+    rid = getattr(request.state, "request_id", None)
+    if not manager_v4.loaded:
+        return _v4_unavailable(rid)
+    player = player.strip()
+    if not manager_v4.has_player(player):
+        return _v4_error(status.HTTP_404_NOT_FOUND, "NOT_FOUND",
+                         f"Unsupported player: {player!r}", rid)
+    year_int: int | None = None
+    if year is not None and str(year).strip():
+        if not str(year).strip().isdigit():
+            return _v4_error(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                             "validation_error",
+                             [{"field": "year", "message": "year must be a four-digit number"}],
+                             rid)
+        year_int = int(str(year).strip())
+    cards = manager_v4.cards(player, year_int)
+    return {"player": player, "year": year_int, "count": len(cards),
+            "cards": cards}
+
+
+@app.get(f"{API_PREFIX_V4}/metadata")
+async def v4_metadata(request: Request):
+    if not manager_v4.loaded:
+        return _v4_unavailable(getattr(request.state, "request_id", None))
+    return manager_v4.metadata_info()
+
+
+@app.post(f"{API_PREFIX_V4}/predict")
+async def v4_predict(payload: PredictV4Request, request: Request):
+    rid = getattr(request.state, "request_id", None)
+
+    if not manager_v4.loaded:
+        try:
+            manager_v4.load()
+        except Exception:                                 # noqa: BLE001
+            return _v4_unavailable(rid)
+
+    # Holding period: seven days only. Anything else is refused — the service
+    # will not annualize a seven-day model into a fabricated longer forecast.
+    days = payload.holding_period_days
+    if days is None:
+        days = SUPPORTED_HOLDING_PERIOD_DAYS
+    if isinstance(days, bool) or not isinstance(days, int) \
+            or days != SUPPORTED_HOLDING_PERIOD_DAYS:
+        return _v4_error(status.HTTP_400_BAD_REQUEST,
+                         "UNSUPPORTED_HOLDING_PERIOD", HOLDING_PERIOD_MESSAGE, rid)
+
+    # Purchase amount: optional; when present it must be a positive number.
+    amount = payload.purchase_amount
+    if amount is not None:
+        valid = (isinstance(amount, (int, float)) and not isinstance(amount, bool)
+                 and amount == amount                     # not NaN
+                 and amount not in (float("inf"), float("-inf")))
+        if not valid or amount <= 0:
+            return _v4_error(status.HTTP_400_BAD_REQUEST,
+                             "INVALID_PURCHASE_AMOUNT",
+                             "purchase_amount must be a positive number (USD).",
+                             rid)
+        if amount > 100_000_000:
+            return _v4_error(status.HTTP_400_BAD_REQUEST,
+                             "INVALID_PURCHASE_AMOUNT",
+                             "purchase_amount is implausibly large.", rid)
+        amount = float(amount)
+
+    try:
+        # Exact identity only — the selected grade_uid is passed through
+        # verbatim and there is no fuzzy fallback of any kind.
+        result = await asyncio.wait_for(
+            asyncio.to_thread(manager_v4.predict,
+                              grade_uid=payload.grade_uid.strip(),
+                              purchase_amount=amount),
+            timeout=PREDICT_TIMEOUT_SECONDS)
+    except asyncio.TimeoutError:
+        log.warning("[%s] v4 prediction timed out after %.0fs", rid,
+                    PREDICT_TIMEOUT_SECONDS)
+        return _v4_error(status.HTTP_504_GATEWAY_TIMEOUT, "prediction_timeout",
+                         "The prediction took too long. Please retry.", rid)
+    except Exception:                                     # noqa: BLE001
+        log.exception("[%s] v4 prediction failed", rid)
+        return _v4_error(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         "prediction_failed",
+                         "The model could not score this identity.", rid)
+
+    model_status = result.get("status")
+    if model_status == "NOT_FOUND":
+        return _v4_error(status.HTTP_404_NOT_FOUND, "NOT_FOUND",
+                         "No exact card-grade identity matches this grade_uid. "
+                         "No similar card was substituted.", rid)
+    if model_status == "REJECTED_QUALIFIER":
+        return _v4_error(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                         "REJECTED_QUALIFIER",
+                         "Qualifier identities (OC, MC, MK, ST, PD, OF) are "
+                         "not supported by this model.", rid)
+    if model_status == "INSUFFICIENT_DATA":
+        return _v4_error(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                         "INSUFFICIENT_DATA",
+                         result.get("message") or
+                         "This identity has no usable exact sales history.", rid)
+
+    result["holding_period_days"] = SUPPORTED_HOLDING_PERIOD_DAYS
+    return JSONResponse(status_code=status.HTTP_200_OK, content=result)

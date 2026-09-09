@@ -137,9 +137,11 @@ export function RadioGroup({
   );
 }
 
-export function SubmitButton({ loading, children }: { loading?: boolean; children: ReactNode }) {
+export function SubmitButton({ loading, disabled, children }: {
+  loading?: boolean; disabled?: boolean; children: ReactNode;
+}) {
   return (
-    <button type="submit" disabled={loading} aria-busy={loading || undefined}
+    <button type="submit" disabled={loading || disabled} aria-busy={loading || undefined}
       className="flex w-full items-center justify-center gap-3 rounded-xl bg-viking-gold px-6 py-3.5
                  text-sm font-semibold text-viking-deep transition-colors hover:bg-viking-amber
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-viking-gold/60

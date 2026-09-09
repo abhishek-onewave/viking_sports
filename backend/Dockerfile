@@ -24,6 +24,7 @@ WORKDIR /app
 # ---- dependency layer (cached unless requirements change) -------------------
 COPY requirements.txt ./
 COPY model_service/model/requirements_v3.txt ./model_service/model/
+COPY model_service/model_v4/requirements_v4.txt ./model_service/model_v4/
 RUN pip install -r requirements.txt
 
 # ---- application + model ---------------------------------------------------
@@ -38,6 +39,7 @@ USER appuser
 
 ENV MODEL_BUNDLE_PATH=/app/model_service/model/card_investment_bundle_v3.joblib \
     MODEL_METADATA_PATH=/app/model_service/model/model_metadata_v3.json \
+    MODEL_V4_BUNDLE_PATH=/app/model_service/model_v4/card_investment_bundle_v4.joblib \
     PORT=8000 \
     WEB_CONCURRENCY=2 \
     PREDICT_TIMEOUT_SECONDS=20 \
