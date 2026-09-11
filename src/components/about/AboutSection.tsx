@@ -27,7 +27,7 @@ const features = [
   {
     title: 'ML Analysis',
     description:
-      'XGBoost classifier with a CatBoost valuation blend. 64.0% accuracy and 0.70 ROC-AUC on an untouched 2026 test set',
+      'Model V4 forecasts next week\u2019s value for an exact card-grade identity. 69.0% accuracy and 0.73 ROC-AUC on a chronological holdout',
     icon: (
       <svg
         className="h-7 w-7"
@@ -66,13 +66,18 @@ const features = [
   },
 ];
 
-// Every figure below is measured on the v3 model's untouched 2026 test set.
-// See model_metadata_v3.json. Do not edit without re-reading that file.
+// Every figure below comes from the deployed V4 model's own /metadata
+// endpoint (read 2026-09-11), not from a spreadsheet. Re-read
+// /api/v1/card-analyzer/metadata before changing any of them.
+//
+// "Card Identities" replaces the old "Deals Analyzed": V4 forecasts an exact
+// card-grade identity rather than scoring a free-text deal, so the count of
+// identities it can actually predict is the honest measure of its reach.
 const stats = [
-  { label: 'Deals Analyzed', target: 147398, suffix: '' },
-  { label: 'Asset Types', target: 3, suffix: '' },
-  { label: 'Accuracy', target: 64.0, suffix: '%', decimals: 1 },
-  { label: 'ROC-AUC', target: 0.70, suffix: '', decimals: 2 },
+  { label: 'Card Identities', target: 5356, suffix: '' },
+  { label: 'Players Covered', target: 3, suffix: '' },
+  { label: 'Accuracy', target: 69.0, suffix: '%', decimals: 1 },
+  { label: 'ROC-AUC', target: 0.73, suffix: '', decimals: 2 },
 ];
 
 function AnimatedCounter({

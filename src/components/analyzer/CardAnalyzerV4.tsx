@@ -169,8 +169,8 @@ export default function CardAnalyzerV4() {
         </h1>
 
         <p className="mb-8 max-w-2xl text-[16px] leading-[1.75] text-viking-steel">
-          Select an exact card-grade identity — player, year, set, card number,
-          parallel, grader and grade — and the model forecasts next week&apos;s
+          Select an exact card-grade identity (player, year, set, card number,
+          parallel, grader and grade) and the model forecasts next week&apos;s
           market valuation for precisely that asset. Add an expected purchase
           price to receive a BUY, DO NOT BUY or REVIEW recommendation.
         </p>
@@ -256,7 +256,7 @@ export default function CardAnalyzerV4() {
                 player
                   ? `${cards.length.toLocaleString()} predictable identities${
                       year ? ` in ${year}` : ''
-                    } for ${player} · YEAR — SET — #CARD NUMBER — PARALLEL — GRADER GRADE`
+                    } for ${player} · YEAR · SET · #CARD NUMBER · PARALLEL · GRADER GRADE`
                   : 'Only Michael Jordan, Mickey Mantle and Tom Brady are supported by this model.'
               }
             />
@@ -267,7 +267,7 @@ export default function CardAnalyzerV4() {
                 label="Expected purchase price"
                 value={purchase}
                 onChange={setPurchase}
-                placeholder="Optional — e.g. 50,000.00"
+                placeholder="Optional, e.g. 50,000.00"
                 inputMode="decimal"
                 prefix="$"
                 hint="Leave empty for a valuation-only forecast. Positive USD amounts only."

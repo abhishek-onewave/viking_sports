@@ -9,6 +9,7 @@
  * WHOLE identity — the exact grade_uid is what gets submitted, never the
  * display text and never a list index. Typing after a selection clears it.
  */
+import { formatDisplayName } from '@/lib/cardAnalyzer/logic';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { filterCards } from '@/lib/cardAnalyzer';
@@ -93,7 +94,7 @@ export default function CardCombobox({
     }
   }
 
-  const shownValue = selected ? selected.display_name : query;
+  const shownValue = selected ? formatDisplayName(selected.display_name) : query;
 
   return (
     <div ref={wrapRef}>
@@ -157,7 +158,7 @@ export default function CardCombobox({
                                   ? 'bg-viking-slate/60 text-viking-snow'
                                   : 'text-viking-mist hover:bg-viking-slate/40'}`}
                   >
-                    <span>{card.display_name}</span>
+                    <span>{formatDisplayName(card.display_name)}</span>
                     <span className="shrink-0 text-[11px] text-viking-steel/60">
                       {card.historical_sales_count} sales
                     </span>
@@ -166,7 +167,7 @@ export default function CardCombobox({
                 {filtered.length > MAX_RENDERED_OPTIONS && (
                   <p className="sticky bottom-0 border-t border-viking-iron/30 bg-viking-deep/95
                                 px-4 py-2.5 text-[11px] text-viking-steel">
-                    Showing {MAX_RENDERED_OPTIONS} of {filtered.length.toLocaleString()} — keep
+                    Showing {MAX_RENDERED_OPTIONS} of {filtered.length.toLocaleString()}. Keep
                     typing to refine.
                   </p>
                 )}

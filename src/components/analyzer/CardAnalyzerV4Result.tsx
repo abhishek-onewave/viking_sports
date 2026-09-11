@@ -236,7 +236,7 @@ export default function CardAnalyzerV4Result({
           {perf && (
             <div className="mt-6 border-t border-viking-iron/30 pt-5">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-viking-steel/70">
-                Final chronological holdout — BUY decision
+                Final chronological holdout: BUY decision
               </p>
               <dl>
                 <Row label="Overall BUY accuracy" value={formatPercent(perf.buy_accuracy ?? NaN, 2)} />

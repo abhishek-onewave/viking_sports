@@ -138,12 +138,14 @@ export default function HeroSection() {
             {/* Stat row */}
             <motion.div variants={itemVariants} className="mt-14 flex gap-8">
               {[
-                // Measured, not aspirational. 64.0% is accuracy across ALL
-                // cases; 87.6% is the high-confidence subset, which covers only
-                // 9.6% of them — quoting that alone would overstate the model.
-                { value: '147k', label: 'Deals Analyzed' },
-                { value: '64.0%', label: 'Accuracy' },
-                { value: '0.70', label: 'ROC-AUC' },
+                // V4 figures, read from the deployed model's /metadata
+                // endpoint on 2026-09-11. Accuracy is buy_accuracy across ALL
+                // cases; the high-confidence subset scores 89.5% but covers
+                // only 2.5% of them, so quoting that alone would flatter the
+                // model. Re-read /api/v1/card-analyzer/metadata before editing.
+                { value: '5,356', label: 'Card Identities' },
+                { value: '69.0%', label: 'Accuracy' },
+                { value: '0.73', label: 'ROC-AUC' },
               ].map((stat) => (
                 <div key={stat.label} className="group">
                   <div className="text-2xl font-bold text-viking-gold font-display tabular-nums group-hover:text-viking-amber transition-colors">

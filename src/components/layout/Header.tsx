@@ -6,19 +6,24 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { signOut } from "@/lib/supabase/auth";
 
-// Hash links only resolve on the landing page; `route: true` entries are real
-// pages and use next/link so they work from anywhere in the app.
+// `route: true` entries are real pages and use next/link, so they work from
+// anywhere. Bare hash links only resolve on the landing page.
 const NAV_LINKS = [
-  { label: "About", href: "#about" },
-  // One entry for the card analyser, not two. Repointing the old "Analyzer"
-  // (which was #predictor, now removed) at /analysis left it duplicating the
-  // "Analysis" entry — three links to the same page counting the CTA.
-  { label: "Analyzer", href: "/analysis", route: true },
-  // The V4 exact-identity analyzer lives beside the v3 free-text one: they are
-  // different models with different contracts, so both stay reachable.
-  { label: "Card Analyzer", href: "/card-analyzer", route: true },
+  // "Home", not "About". As a bare "#about" this did nothing on /indexes,
+  // /analysis or /card-analyzer: a fragment resolves against the page you are
+  // already on, and those pages have no #about section. Pointing at "/" makes
+  // it work from every route, and going to the top of the landing page is what
+  // people expect from the first nav item anyway.
+  { label: "Home", href: "/", route: true },
+  // Named by model version. "Analyzer" and "Card Analyzer" gave no clue which
+  // was which, and they are different models with different contracts: v3
+  // takes free text, v4 takes an exact grade identity.
+  { label: "Analyzer v3", href: "/analysis", route: true },
+  { label: "Analyzer v4", href: "/card-analyzer", route: true },
   { label: "Indexes", href: "/indexes", route: true },
-  { label: "History", href: "#dashboard" },
+  // Still a fragment, so it is prefixed with "/" to jump to the landing page
+  // first rather than silently doing nothing away from it.
+  { label: "History", href: "/#dashboard", route: true },
 ];
 
 export default function Header() {

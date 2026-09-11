@@ -46,7 +46,7 @@ export function validate(form: FormState): Errors {
   const e: Errors = {};
   if (!form.card_name.trim()) e.card_name = 'Enter the card title.';
   else if (form.card_name.trim().length < 4)
-    e.card_name = 'Add more detail — year, set, player, number and grade.';
+    e.card_name = 'Add more detail: year, set, player, number and grade.';
 
   const amount = Number(form.purchase_amount);
   if (!form.purchase_amount.trim()) e.purchase_amount = 'Enter the purchase amount.';
@@ -187,8 +187,8 @@ export default function CardInvestmentV3() {
             >
               <ServerCrash className="mt-0.5 h-[18px] w-[18px] shrink-0 text-viking-amber" strokeWidth={1.5} />
               <p className="text-[13px] leading-[1.65] text-viking-steel">
-                The analysis service is not responding. You can still submit — the
-                request will be retried against the service — but a result may not
+                The analysis service is not responding. You can still submit, and the
+                request will be retried against the service, but a result may not
                 be available until it is back.
               </p>
             </div>

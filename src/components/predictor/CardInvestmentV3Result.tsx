@@ -193,7 +193,7 @@ export default function CardInvestmentResult({
           <div className="flex flex-wrap items-center gap-4">
             <Icon className={`h-7 w-7 shrink-0 ${style.text}`} strokeWidth={1.5} />
             <div>
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-viking-steel">{rejected ? 'Provisional only — match rejected' : 'Recommendation'}</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-viking-steel">{rejected ? 'Provisional only: match rejected' : 'Recommendation'}</span>
               <p
                 className={`mt-1 font-[family-name:var(--font-display)] text-[34px] leading-none sm:text-[42px] ${style.text}`}
                 data-testid="decision-badge"
@@ -217,8 +217,8 @@ export default function CardInvestmentResult({
               <dd className="mt-1 text-[14px] text-viking-mist"
                   data-testid="high-confidence-action">
                 {result.high_confidence_action === 'REVIEW'
-                  ? 'Not sufficient — manual review required'
-                  : `Sufficient — ${result.high_confidence_action}`}
+                  ? 'Not sufficient: manual review required'
+                  : `Sufficient: ${result.high_confidence_action}`}
               </dd>
             </div>
             <div>
@@ -287,7 +287,7 @@ export default function CardInvestmentResult({
 
           <ul className="space-y-2.5 text-[13px] leading-[1.7] text-viking-steel">
             <li>Assumes a <strong className="font-medium text-viking-mist">12% estimated transaction cost</strong> and a <strong className="font-medium text-viking-mist">10% required annual return</strong>.</li>
-            <li><strong className="font-medium text-viking-mist">REVIEW</strong> means the model does not have enough confidence for automatic action — it is not a soft no.</li>
+            <li><strong className="font-medium text-viking-mist">REVIEW</strong> means the model does not have enough confidence for automatic action. It is not a soft no.</li>
             <li>High-confidence automatic decisions reached <strong className="font-medium text-viking-mist">87.58% accuracy</strong> on the untouched 2026 test subset, covering <strong className="font-medium text-viking-mist">9.57%</strong> of cases.</li>
             <li>Across all cases, test accuracy was <strong className="font-medium text-viking-mist">64.04%</strong>.</li>
             <li>Typical valuation error was approximately <strong className="font-medium text-viking-mist">18.37%</strong>.</li>

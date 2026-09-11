@@ -111,3 +111,18 @@ export const ANALYZER_ERROR_MESSAGES: Record<string, string> = {
   MODEL_UNAVAILABLE:
     'The analysis service is unavailable. Please try again shortly.',
 };
+
+/**
+ * The service builds display_name with em-dash separators
+ * ("1986 — Fleer — #8 — Sticker — PSA 4.0"). Normalise them to middots for
+ * display.
+ *
+ * Done here rather than in the model service on purpose: the separator is a
+ * presentation choice, the API contract is not, and changing the backend would
+ * mean a redeploy plus a version skew where an older frontend renders the new
+ * string. Search still runs against the original text, so a user typing a dash
+ * is unaffected.
+ */
+export function formatDisplayName(name: string): string {
+  return name.replace(/\s*\u2014\s*/g, ' · ');
+}

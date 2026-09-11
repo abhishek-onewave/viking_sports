@@ -385,7 +385,7 @@ export default function PredictionForm() {
             {!authLoading && !user && (
               <div className="mb-6 rounded-xl border border-viking-gold/20 bg-viking-gold/5 px-5 py-4 flex items-center justify-between gap-4">
                 <p className="text-sm text-viking-steel">
-                  <span className="text-viking-gold font-medium">Sign in required</span> — Create a free account to analyze deals
+                  <span className="text-viking-gold font-medium">Sign in required</span>. Create a free account to analyze deals
                 </p>
                 <a
                   href="/login"
